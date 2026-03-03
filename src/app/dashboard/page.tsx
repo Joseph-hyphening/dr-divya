@@ -20,10 +20,11 @@ import Link from 'next/link';
 
 const DashboardPage = () => {
   const sidebarItems = [
-    { icon: LayoutDashboard, label: 'OVERVIEW', active: true },
-    { icon: BarChart3, label: 'ANALYTICS', active: false },
-    { icon: Layers, label: 'PROJECTS', active: false },
-    { icon: Settings, label: 'SETTINGS', active: false },
+    { icon: LayoutDashboard, label: 'OVERVIEW', href: '/dashboard', active: true },
+    { icon: BarChart3, label: 'ANALYTICS', href: '#', active: false },
+    { icon: Layers, label: 'PROJECTS', href: '#', active: false },
+    { icon: Clock, label: 'CALL LOGS', href: '/dashboard/logs', active: false },
+    { icon: Settings, label: 'SETTINGS', href: '#', active: false },
   ];
 
   const stats = [
@@ -55,7 +56,7 @@ const DashboardPage = () => {
           {sidebarItems.map((item, index) => (
             <Link 
               key={index} 
-              href="#" 
+              href={item.href} 
               className={`flex items-center space-x-4 text-xs font-bold tracking-[0.2em] transition-all hover:opacity-70 ${
                 item.active ? 'text-[#763c26]' : 'text-[#1a1a1a]/40'
               }`}

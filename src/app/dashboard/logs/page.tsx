@@ -1,0 +1,316 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  LayoutDashboard, 
+  BarChart3, 
+  Layers, 
+  Settings, 
+  LogOut, 
+  Bell, 
+  Search, 
+  User,
+  Clock,
+  ArrowUpDown,
+  Filter,
+  MoreHorizontal,
+  Phone,
+  Calendar,
+  Zap,
+  CheckCircle2,
+  XCircle,
+  Play
+} from 'lucide-react';
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+
+interface CallLog {
+  id: string;
+  user_name: string;
+  phone_number: string;
+  preferred_date_time: string;
+  preferred_procedure: string;
+  duration_ms: number;
+  status: string;
+  transcript?: string;
+}
+
+const LogsPage = () => {
+  const [logs, setLogs] = useState<CallLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const sidebarItems = [
+    { icon: LayoutDashboard, label: 'OVERVIEW', href: '/dashboard', active: false },
+    { icon: BarChart3, label: 'ANALYTICS', href: '#', active: false },
+    { icon: Layers, label: 'PROJECTS', href: '#', active: false },
+    { icon: Clock, label: 'CALL LOGS', href: '/dashboard/logs', active: true },
+    { icon: Settings, label: 'SETTINGS', href: '#', active: false },
+  ];
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('retell_ai_calls')
+        .select('*')
+        .order('start_time', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching logs:', error);
+      } else if (data && data.length > 0) {
+        setLogs(data);
+      } else {
+        // Mock data for initial view if table is empty
+        setLogs([
+          {
+            id: '1',
+            user_name: 'John Doe',
+            phone_number: '+1234567890',
+            preferred_date_time: new Date(Date.now() + 86400000).toISOString(),
+            preferred_procedure: 'Consultation',
+            duration_ms: 125000,
+            status: 'completed',
+            transcript: 'H: Hello, this is Retell AI. A: Hi, I have a question about my booking.'
+          },
+          {
+            id: '2',
+            user_name: 'Jane Smith',
+            phone_number: '+1987654321',
+            preferred_date_time: new Date(Date.now() + 172800000).toISOString(),
+            preferred_procedure: 'Cleaning',
+            duration_ms: 45000,
+            status: 'completed',
+            transcript: 'H: Hello? ... [Connection lost]'
+          }
+        ]);
+      }
+      setLoading(false);
+    };
+
+    fetchLogs();
+  }, []);
+
+  const formatDuration = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}m ${seconds}s`;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const stats = [
+    { label: 'TOTAL CALLS', value: logs.length, icon: Phone },
+    { label: 'AVG DURATION', value: logs.length ? formatDuration(logs.reduce((acc, log) => acc + log.duration_ms, 0) / logs.length) : '0s', icon: Clock },
+    { label: 'SUCCESS RATE', value: logs.length ? `${Math.round((logs.filter(l => l.status === 'completed').length / logs.length) * 100)}%` : '0%', icon: Zap },
+  ];
+
+  const filteredLogs = logs.filter(log => 
+    log.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.phone_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.preferred_procedure?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="flex h-screen bg-[#faf7f3] text-[#1a1a1a] font-sans overflow-hidden">
+      {/* Sidebar */}
+      <motion.aside 
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="w-64 border-r border-[#763c26]/10 flex flex-col p-8 z-20"
+      >
+        <div className="text-xl font-bold tracking-wider mb-12">
+          mnmlst.
+        </div>
+        
+        <nav className="flex-grow space-y-8">
+          {sidebarItems.map((item, index) => (
+            <Link 
+              key={index} 
+              href={item.href} 
+              className={`flex items-center space-x-4 text-xs font-bold tracking-[0.2em] transition-all hover:opacity-70 ${
+                item.active ? 'text-[#763c26]' : 'text-[#1a1a1a]/40'
+              }`}
+            >
+              <item.icon className="h-4 w-4" />
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <Link 
+          href="/" 
+          className="flex items-center space-x-4 text-xs font-bold tracking-[0.2em] text-[#1a1a1a]/40 hover:text-red-500 transition-colors"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>SIGN OUT</span>
+        </Link>
+      </motion.aside>
+
+      {/* Main Content */}
+      <main className="flex-grow flex flex-col overflow-y-auto">
+        <header className="h-20 border-b border-[#763c26]/10 flex items-center justify-between px-12 z-10 sticky top-0 bg-[#faf7f3]/80 backdrop-blur-md">
+          <div className="flex items-center bg-[#1a1a1a]/5 px-4 py-2 rounded-full w-96">
+            <Search className="h-4 w-4 text-[#1a1a1a]/40 mr-2" />
+            <input 
+              type="text" 
+              placeholder="SEARCH LOGS..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="bg-transparent border-none outline-none text-xs font-bold tracking-widest w-full placeholder-[#1a1a1a]/20"
+            />
+          </div>
+
+          <div className="flex items-center space-x-6">
+            <button className="relative p-2 text-[#1a1a1a]/60 hover:text-[#763c26] transition-colors">
+              <Bell className="h-5 w-5" />
+              <span className="absolute top-2 right-2 h-2 w-2 bg-[#763c26] rounded-full border-2 border-[#faf7f3]"></span>
+            </button>
+            <div className="flex items-center space-x-3 cursor-pointer group">
+              <div className="text-right">
+                <p className="text-[10px] font-bold tracking-[0.2em] group-hover:text-[#763c26] transition-colors">ALEX RIVERA</p>
+                <p className="text-[8px] font-medium tracking-widest text-[#1a1a1a]/40">CREATIVE DIRECTOR</p>
+              </div>
+              <div className="h-10 w-10 rounded-full bg-[#763c26]/10 flex items-center justify-center border border-[#763c26]/20 group-hover:border-[#763c26] transition-all overflow-hidden">
+                <User className="h-5 w-5 text-[#763c26]" />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="p-12 space-y-12">
+          {/* Header Section */}
+          <div className="flex justify-between items-end">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <h1 className="text-5xl font-extrabold tracking-tight mb-2">call logs.</h1>
+              <p className="text-sm font-medium tracking-widest text-[#1a1a1a]/40 uppercase">Analyze your Retell AI interactions</p>
+            </motion.div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+                className="bg-white p-6 border border-[#763c26]/5 rounded-3xl group hover:shadow-xl hover:shadow-[#763c26]/5 transition-all cursor-default"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="p-3 bg-[#faf7f3] rounded-2xl group-hover:bg-[#763c26]/10 transition-colors">
+                    <stat.icon className="h-5 w-5 text-[#763c26]" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold tracking-[0.2em] text-[#1a1a1a]/40 mb-1">{stat.label}</p>
+                    <p className="text-2xl font-extrabold">{stat.value}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Table Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="bg-white rounded-3xl border border-[#763c26]/5 overflow-hidden shadow-sm"
+          >
+            <div className="p-6 border-b border-[#763c26]/5 flex justify-between items-center">
+              <h3 className="text-xs font-bold tracking-[0.2em]">ALL CALLS</h3>
+              <div className="flex items-center space-x-4">
+                <button className="p-2 hover:bg-[#faf7f3] rounded-lg transition-colors">
+                  <Filter className="h-4 w-4 text-[#1a1a1a]/40" />
+                </button>
+                <button className="p-2 hover:bg-[#faf7f3] rounded-lg transition-colors">
+                  <ArrowUpDown className="h-4 w-4 text-[#1a1a1a]/40" />
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#faf7f3]/50">
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">USER NAME</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PHONE NUMBER</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PREFERRED DATE/TIME</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PROCEDURE</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">STATUS</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 text-right">ACTIONS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#763c26]/5">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-[10px] font-bold tracking-widest text-[#1a1a1a]/20">
+                        LOADING LOGS...
+                      </td>
+                    </tr>
+                  ) : filteredLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-[10px] font-bold tracking-widest text-[#1a1a1a]/20">
+                        NO LOGS FOUND.
+                      </td>
+                    </tr>
+                  ) : filteredLogs.map((log) => (
+                    <tr key={log.id} className="group hover:bg-[#faf7f3]/50 transition-colors">
+                      <td className="px-6 py-4 text-[11px] font-bold tracking-tight">{log.user_name}</td>
+                      <td className="px-6 py-4 text-[11px] font-medium text-[#1a1a1a]/60">{log.phone_number}</td>
+                      <td className="px-6 py-4 text-[11px] font-medium text-[#1a1a1a]/60">
+                         <div className="flex items-center space-x-2">
+                            <Calendar className="h-3 w-3" />
+                            <span>{formatDate(log.preferred_date_time)}</span>
+                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-[11px] font-medium text-[#1a1a1a]/60">
+                        <span className="bg-[#1a1a1a]/5 px-2 py-1 rounded-md">
+                          {log.preferred_procedure}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase ${
+                          log.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                        }`}>
+                          {log.status === 'completed' ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                          {log.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button className="p-2 hover:bg-[#763c26]/10 rounded-lg transition-colors group/btn">
+                             <Play className="h-3 w-3 text-[#763c26]" />
+                          </button>
+                          <button className="p-2 hover:bg-black/5 rounded-lg transition-colors">
+                            <MoreHorizontal className="h-3 w-3 text-[#1a1a1a]/40" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default LogsPage;
