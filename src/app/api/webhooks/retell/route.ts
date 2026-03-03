@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
+import Retell from 'retell-sdk';
 import { supabase } from '@/lib/supabase';
+
+const retell = new Retell({
+  apiKey: process.env.RETELL_API_KEY || '',
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,24 +12,33 @@ export async function POST(req: NextRequest) {
     const signature = req.headers.get('x-retell-signature');
     const webhookSecret = process.env.RETELL_WEBHOOK_SECRET;
 
-    // 1. Verify Signature
+    // 1. Verify Signature using official SDK
     if (!webhookSecret) {
-      console.error('RETELL_WEBHOOK_SECRET is not set');
+      console.error('CRITICAL: RETELL_WEBHOOK_SECRET is not set in environment variables');
       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
     if (!signature) {
+      console.error('Webhook Error: Missing x-retell-signature header');
       return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
     }
 
-    const expectedSignature = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(body)
-      .digest('hex');
-
-    if (signature !== expectedSignature) {
-      console.error('Invalid signature');
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    try {
+      // Use the SDK's built-in verification method
+      const isValid = await Retell.verify(body, webhookSecret, signature);
+      if (!isValid) {
+        throw new Error('Invalid signature');
+      }
+    } catch (err) {
+      console.error('--- WEBHOOK SIGNATURE MISMATCH (SDK) ---');
+      console.error('Received Signature:', signature);
+      console.error('Error:', err);
+      console.error('----------------------------------------');
+      
+      return NextResponse.json({ 
+        error: 'Invalid signature',
+        message: 'Signature verification failed. Check your RETELL_WEBHOOK_SECRET and ensure it matches the one in Retell Dashboard.'
+      }, { status: 401 });
     }
 
     // 2. Parse Payload
