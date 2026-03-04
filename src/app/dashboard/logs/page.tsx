@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, 
   BarChart3, 
@@ -21,13 +21,16 @@ import {
   CheckCircle2,
   XCircle,
   Play,
-  RefreshCw
+  RefreshCw,
+  FileText,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 interface CallLog {
   id: string;
+  call_id: string;
   user_name: string;
   phone_number: string;
   preferred_date_time: string;
@@ -35,6 +38,7 @@ interface CallLog {
   duration_ms: number;
   status: string;
   transcript?: string;
+  start_time: string;
 }
 
 const LogsPage = () => {
@@ -42,6 +46,7 @@ const LogsPage = () => {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTranscript, setSelectedTranscript] = useState<string | null>(null);
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'OVERVIEW', href: '/dashboard', active: false },
@@ -67,23 +72,27 @@ const LogsPage = () => {
       setLogs([
         {
           id: '1',
+          call_id: 'call_mock_1',
           user_name: 'John Doe',
           phone_number: '+1234567890',
           preferred_date_time: new Date(Date.now() + 86400000).toISOString(),
           preferred_procedure: 'Consultation',
           duration_ms: 125000,
           status: 'completed',
-          transcript: 'H: Hello, this is Retell AI. A: Hi, I have a question about my booking.'
+          start_time: new Date().toISOString(),
+          transcript: 'Agent: Hello, how can I help? User: I want to book a consultation.'
         },
         {
           id: '2',
+          call_id: 'call_mock_2',
           user_name: 'Jane Smith',
           phone_number: '+1987654321',
           preferred_date_time: new Date(Date.now() + 172800000).toISOString(),
           preferred_procedure: 'Cleaning',
           duration_ms: 45000,
           status: 'completed',
-          transcript: 'H: Hello? ... [Connection lost]'
+          start_time: new Date().toISOString(),
+          transcript: 'Agent: Hello? User: Hi, is this Dr. Divya\'s clinic?'
         }
       ]);
     }
@@ -104,7 +113,6 @@ const LogsPage = () => {
       const result = await response.json();
       
       if (result.success) {
-        // Refresh the table data
         await fetchLogs();
         alert(`Sync successful! Processed ${result.stats.added} calls.`);
       } else {
@@ -127,7 +135,9 @@ const LogsPage = () => {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleString('en-US', {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'N/A';
+      return date.toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
@@ -296,6 +306,7 @@ const LogsPage = () => {
                     <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PHONE NUMBER</th>
                     <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PREFERRED DATE/TIME</th>
                     <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PROCEDURE</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">DURATION</th>
                     <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">STATUS</th>
                     <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 text-right">ACTIONS</th>
                   </tr>
@@ -303,13 +314,13 @@ const LogsPage = () => {
                 <tbody className="divide-y divide-[#763c26]/5">
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-[10px] font-bold tracking-widest text-[#1a1a1a]/20">
+                      <td colSpan={7} className="px-6 py-12 text-center text-[10px] font-bold tracking-widest text-[#1a1a1a]/20">
                         LOADING LOGS...
                       </td>
                     </tr>
                   ) : filteredLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-12 text-center text-[10px] font-bold tracking-widest text-[#1a1a1a]/20">
+                      <td colSpan={7} className="px-6 py-12 text-center text-[10px] font-bold tracking-widest text-[#1a1a1a]/20">
                         NO LOGS FOUND.
                       </td>
                     </tr>
@@ -328,18 +339,25 @@ const LogsPage = () => {
                           {log.preferred_procedure}
                         </span>
                       </td>
+                      <td className="px-6 py-4 text-[11px] font-medium text-[#1a1a1a]/60">
+                        {formatDuration(log.duration_ms)}
+                      </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase ${
-                          log.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
+                          log.status === 'completed' || log.status === 'ended' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'
                         }`}>
-                          {log.status === 'completed' ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                          {log.status === 'completed' || log.status === 'ended' ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
                           {log.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 hover:bg-[#763c26]/10 rounded-lg transition-colors group/btn">
-                             <Play className="h-3 w-3 text-[#763c26]" />
+                          <button 
+                            onClick={() => setSelectedTranscript(log.transcript || 'No transcript available.')}
+                            className="p-2 hover:bg-[#763c26]/10 rounded-lg transition-colors group/btn"
+                            title="View Transcript"
+                          >
+                             <FileText className="h-3 w-3 text-[#763c26]" />
                           </button>
                           <button className="p-2 hover:bg-black/5 rounded-lg transition-colors">
                             <MoreHorizontal className="h-3 w-3 text-[#1a1a1a]/40" />
@@ -354,6 +372,50 @@ const LogsPage = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Transcript Modal */}
+      <AnimatePresence>
+        {selectedTranscript && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedTranscript(null)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-[#763c26]/5 flex justify-between items-center bg-[#faf7f3]">
+                <h3 className="text-xs font-bold tracking-[0.2em] uppercase">Call Transcript</h3>
+                <button 
+                  onClick={() => setSelectedTranscript(null)}
+                  className="p-2 hover:bg-[#763c26]/10 rounded-full transition-colors"
+                >
+                  <X className="h-4 w-4 text-[#763c26]" />
+                </button>
+              </div>
+              <div className="p-8 max-h-[60vh] overflow-y-auto bg-white">
+                <p className="text-sm leading-relaxed text-[#1a1a1a]/80 whitespace-pre-wrap font-mono">
+                  {selectedTranscript}
+                </p>
+              </div>
+              <div className="p-6 border-t border-[#763c26]/5 flex justify-end bg-[#faf7f3]">
+                <button 
+                  onClick={() => setSelectedTranscript(null)}
+                  className="px-6 py-2 bg-[#763c26] text-white text-[10px] font-bold tracking-widest rounded-full hover:bg-[#5d2f1d] transition-colors"
+                >
+                  CLOSE
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
