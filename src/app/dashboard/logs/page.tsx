@@ -20,7 +20,8 @@ import {
   Zap,
   CheckCircle2,
   XCircle,
-  Play
+  Play,
+  RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -39,6 +40,7 @@ interface CallLog {
 const LogsPage = () => {
   const [logs, setLogs] = useState<CallLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const sidebarItems = [
@@ -49,48 +51,72 @@ const LogsPage = () => {
     { icon: Settings, label: 'SETTINGS', href: '#', active: false },
   ];
 
+  const fetchLogs = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('retell_ai_calls')
+      .select('*')
+      .order('start_time', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching logs:', error);
+    } else if (data && data.length > 0) {
+      setLogs(data);
+    } else {
+      // Mock data for initial view if table is empty
+      setLogs([
+        {
+          id: '1',
+          user_name: 'John Doe',
+          phone_number: '+1234567890',
+          preferred_date_time: new Date(Date.now() + 86400000).toISOString(),
+          preferred_procedure: 'Consultation',
+          duration_ms: 125000,
+          status: 'completed',
+          transcript: 'H: Hello, this is Retell AI. A: Hi, I have a question about my booking.'
+        },
+        {
+          id: '2',
+          user_name: 'Jane Smith',
+          phone_number: '+1987654321',
+          preferred_date_time: new Date(Date.now() + 172800000).toISOString(),
+          preferred_procedure: 'Cleaning',
+          duration_ms: 45000,
+          status: 'completed',
+          transcript: 'H: Hello? ... [Connection lost]'
+        }
+      ]);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchLogs = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('retell_ai_calls')
-        .select('*')
-        .order('start_time', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching logs:', error);
-      } else if (data && data.length > 0) {
-        setLogs(data);
-      } else {
-        // Mock data for initial view if table is empty
-        setLogs([
-          {
-            id: '1',
-            user_name: 'John Doe',
-            phone_number: '+1234567890',
-            preferred_date_time: new Date(Date.now() + 86400000).toISOString(),
-            preferred_procedure: 'Consultation',
-            duration_ms: 125000,
-            status: 'completed',
-            transcript: 'H: Hello, this is Retell AI. A: Hi, I have a question about my booking.'
-          },
-          {
-            id: '2',
-            user_name: 'Jane Smith',
-            phone_number: '+1987654321',
-            preferred_date_time: new Date(Date.now() + 172800000).toISOString(),
-            preferred_procedure: 'Cleaning',
-            duration_ms: 45000,
-            status: 'completed',
-            transcript: 'H: Hello? ... [Connection lost]'
-          }
-        ]);
-      }
-      setLoading(false);
-    };
-
     fetchLogs();
   }, []);
+
+  const handleSync = async () => {
+    try {
+      setSyncing(true);
+      const response = await fetch('/api/retell/sync', {
+        method: 'POST',
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Refresh the table data
+        await fetchLogs();
+        alert(`Sync successful! Processed ${result.stats.added} calls.`);
+      } else {
+        alert(`Sync failed: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      alert('An unexpected error occurred during sync.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const formatDuration = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -100,12 +126,16 @@ const LogsPage = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      return new Date(dateString).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch {
+      return 'N/A';
+    }
   };
 
   const stats = [
@@ -198,6 +228,21 @@ const LogsPage = () => {
             >
               <h1 className="text-5xl font-extrabold tracking-tight mb-2">call logs.</h1>
               <p className="text-sm font-medium tracking-widest text-[#1a1a1a]/40 uppercase">Analyze your Retell AI interactions</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <button 
+                onClick={handleSync}
+                disabled={syncing}
+                className={`flex items-center space-x-3 px-6 py-3 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase transition-all shadow-lg hover:shadow-[#763c26]/20 bg-[#763c26] text-white hover:bg-[#5d2f1d] active:scale-95 disabled:opacity-50 disabled:pointer-events-none`}
+              >
+                <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+                <span>{syncing ? 'Syncing...' : 'Sync with Retell'}</span>
+              </button>
             </motion.div>
           </div>
 
