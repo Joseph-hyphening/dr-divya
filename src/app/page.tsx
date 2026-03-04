@@ -23,7 +23,7 @@ const MinimalistHeroDemo = () => {
     <MinimalistHero
       logoText="mnmlst."
       navLinks={navLinks}
-      loginLink="/login"
+      loginLink="/dashboard/logs"
       mainText="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ultrices, justo vel tempus."
       readMoreLink="#"
       imageSrc="/dr-divya.png"
