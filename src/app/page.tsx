@@ -3,13 +3,24 @@
 import React from 'react';
 import { Facebook, Instagram, Twitter, Linkedin } from 'lucide-react';
 import { MinimalistHero } from '@/components/ui/minimalist-hero';
+import { AboutSection } from '@/components/sections/About';
+import { ServicesSection } from '@/components/sections/Services';
+import { FooterSection } from '@/components/sections/Footer';
+import { SocialProofBar } from '@/components/sections/SocialProofBar';
+import { GallerySlider } from '@/components/sections/GallerySlider';
+import { TechShowcase } from '@/components/sections/TechShowcase';
+import { ChatbotSection } from '@/components/sections/ChatbotSection';
+import { BlogPreview } from '@/components/sections/BlogPreview';
+import { FAQAccordion } from '@/components/sections/FAQAccordion';
+import { StickyMobileActions } from '@/components/ui/StickyMobileActions';
 
 const MinimalistHeroDemo = () => {
   const navLinks = [
     { label: 'HOME', href: '#' },
-    { label: 'PRODUCT', href: '#' },
-    { label: 'STORE', href: '#' },
-    { label: 'ABOUT US', href: '#' },
+    { label: 'ABOUT', href: '#about' },
+    { label: 'SERVICES', href: '#services' },
+    { label: 'TECHNOLOGY', href: '#technology' },
+    { label: 'CONTACT', href: '#contact' },
   ];
 
   const socialLinks = [
@@ -20,21 +31,51 @@ const MinimalistHeroDemo = () => {
   ];
 
   return (
-    <MinimalistHero
-      logoText="mnmlst."
-      navLinks={navLinks}
-      loginLink="/dashboard/logs"
-      mainText="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ultrices, justo vel tempus."
-      readMoreLink="#"
-      imageSrc="/dr-divya.png"
-      imageAlt="Portrait of Dr. Divya Sharma"
-      overlayText={{
-        part1: 'less is',
-        part2: 'more.',
-      }}
-      socialLinks={socialLinks}
-      locationText="Arlington Heights, IL"
-    />
+    <main className="min-h-screen flex flex-col relative bg-background">
+      <MinimalistHero
+        logoText="Dr. Divya's"
+        navLinks={navLinks}
+        loginLink="/dashboard/logs"
+        mainText="Dr. Divya Sharma, MBBS (Gold Medalist), MD (Skin). Bangalore's award-winning dermatologist with 12+ years of clinical excellence and US FDA approved technology."
+        readMoreLink="#about"
+        imageSrc="/dr-divya.png"
+        imageAlt="Dr. Divya Sharma - Bangalore's Award-Winning Dermatologist"
+        overlayText={{
+          part1: 'truly',
+          part2: 'medical.',
+        }}
+        socialLinks={socialLinks}
+        locationText="Whitefield, Bangalore"
+      />
+      
+      <SocialProofBar />
+
+      <div id="about">
+        <AboutSection />
+      </div>
+
+      <div id="services">
+        <ServicesSection />
+      </div>
+
+      <TechShowcase />
+
+      <GallerySlider />
+
+      <ChatbotSection />
+
+      <BlogPreview />
+
+      <FAQAccordion />
+
+      <div id="contact">
+        <FooterSection />
+      </div>
+
+      {/* Floating Elements */}
+      <ChatbotSection isFloating={true} />
+      <StickyMobileActions />
+    </main>
   );
 };
 
