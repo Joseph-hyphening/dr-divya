@@ -61,10 +61,10 @@ const LogsPage = () => {
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'OVERVIEW', href: '/dashboard', active: false },
-    { icon: BarChart3, label: 'ANALYTICS', href: '#', active: false },
-    { icon: Layers, label: 'PROJECTS', href: '#', active: false },
+    // { icon: BarChart3, label: 'ANALYTICS', href: '#', active: false },
+    // { icon: Layers, label: 'PROJECTS', href: '#', active: false },
     { icon: Clock, label: 'CALL LOGS', href: '/dashboard/logs', active: true },
-    { icon: Settings, label: 'SETTINGS', href: '#', active: false },
+    // { icon: Settings, label: 'SETTINGS', href: '#', active: false },
   ];
 
   const fetchLogs = async () => {
