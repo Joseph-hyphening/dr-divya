@@ -35,7 +35,7 @@ const MinimalistHeroDemo = () => {
       <MinimalistHero
         logoText="Dr. Divya's"
         navLinks={navLinks}
-        loginLink="/dashboard/logs"
+        loginLink="/login"
         mainText="Dr. Divya Sharma, MBBS (Gold Medalist), MD (Skin). Bangalore's award-winning dermatologist with 12+ years of clinical excellence and US FDA approved technology."
         readMoreLink="#about"
         imageSrc="/dr-divya.png"
