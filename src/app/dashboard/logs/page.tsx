@@ -39,6 +39,17 @@ interface CallLog {
   status: string;
   transcript?: string;
   start_time: string;
+  action_status?: 'Pending' | 'Scheduled' | 'Cancelled' | 'Follow-up';
+}
+
+interface FilterState {
+  user_name: string;
+  phone_number: string;
+  preferred_date_time: string;
+  preferred_procedure: string;
+  duration_ms: string;
+  status: string;
+  action_status: string;
 }
 
 const LogsPage = () => {
@@ -80,7 +91,8 @@ const LogsPage = () => {
           duration_ms: 125000,
           status: 'completed',
           start_time: new Date().toISOString(),
-          transcript: 'Agent: Hello, how can I help? User: I want to book a consultation.'
+          transcript: 'Agent: Hello, how can I help? User: I want to book a consultation.',
+          action_status: 'Scheduled'
         },
         {
           id: '2',
@@ -92,11 +104,36 @@ const LogsPage = () => {
           duration_ms: 45000,
           status: 'completed',
           start_time: new Date().toISOString(),
-          transcript: 'Agent: Hello? User: Hi, is this Dr. Divya\'s clinic?'
+          transcript: 'Agent: Hello? User: Hi, is this Dr. Divya\'s clinic?',
+          action_status: 'Pending'
         }
       ]);
     }
     setLoading(false);
+  };
+
+  const [filters, setFilters] = useState<FilterState>({
+    user_name: '',
+    phone_number: '',
+    preferred_date_time: '',
+    preferred_procedure: '',
+    duration_ms: '',
+    status: '',
+    action_status: ''
+  });
+
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateActionStatus = (logId: string, newStatus: CallLog['action_status']) => {
+    // Optimistic UI update
+    setLogs(prevLogs => prevLogs.map(log => 
+      log.id === logId ? { ...log, action_status: newStatus } : log
+    ));
+    
+    // Here you would also add the Supabase update call when the DB is ready:
+    // await supabase.from('retell_ai_calls').update({ action_status: newStatus }).eq('id', logId);
   };
 
   useEffect(() => {
@@ -154,11 +191,34 @@ const LogsPage = () => {
     { label: 'SUCCESS RATE', value: logs.length ? `${Math.round((logs.filter(l => l.status === 'completed').length / logs.length) * 100)}%` : '0%', icon: Zap },
   ];
 
-  const filteredLogs = logs.filter(log => 
-    log.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.phone_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    log.preferred_procedure?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredLogs = logs.filter(log => {
+    // Global search term
+    const matchesGlobal = 
+      log.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.phone_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.preferred_procedure?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    // Column-specific filters
+    const matchesUserName = log.user_name?.toLowerCase().includes(filters.user_name.toLowerCase());
+    const matchesPhone = log.phone_number?.toLowerCase().includes(filters.phone_number.toLowerCase());
+    const matchesDate = formatDate(log.preferred_date_time).toLowerCase().includes(filters.preferred_date_time.toLowerCase());
+    const matchesProcedure = log.preferred_procedure?.toLowerCase().includes(filters.preferred_procedure.toLowerCase());
+    const matchesDuration = formatDuration(log.duration_ms).toLowerCase().includes(filters.duration_ms.toLowerCase());
+    const matchesStatus = log.status?.toLowerCase().includes(filters.status.toLowerCase());
+    const currentActionStatus = log.action_status || 'Pending';
+    const matchesActionStatus = filters.action_status === '' || currentActionStatus === filters.action_status;
+
+    return matchesGlobal && matchesUserName && matchesPhone && matchesDate && matchesProcedure && matchesDuration && matchesStatus && matchesActionStatus;
+  });
+
+  const getActionColor = (status: CallLog['action_status'] | undefined) => {
+    switch(status) {
+      case 'Scheduled': return 'bg-blue-50 text-blue-600 border-blue-200';
+      case 'Cancelled': return 'bg-red-50 text-red-600 border-red-200';
+      case 'Follow-up': return 'bg-orange-50 text-orange-600 border-orange-200';
+      default: return 'bg-gray-50 text-gray-600 border-gray-200'; // Pending
+    }
+  };
 
   return (
     <div className="flex h-screen bg-[#faf7f3] text-[#1a1a1a] font-sans overflow-hidden">
@@ -302,13 +362,32 @@ const LogsPage = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#faf7f3]/50">
-                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">USER NAME</th>
-                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PHONE NUMBER</th>
-                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PREFERRED DATE/TIME</th>
-                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">PROCEDURE</th>
-                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">DURATION</th>
-                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40">STATUS</th>
-                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 text-right">ACTIONS</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 w-48">USER NAME</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 w-40">PHONE NUMBER</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 w-48">PREFERRED DATE/TIME</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 w-40">PROCEDURE</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 w-32">DURATION</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 w-32">STAUS</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 w-40">NEXT STEPS</th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-[#1a1a1a]/40 text-right w-24">ACTIONS</th>
+                  </tr>
+                  <tr className="bg-[#faf7f3]/30 border-b border-[#763c26]/5">
+                    <th className="px-6 pb-4"><input type="text" placeholder="Filter name..." value={filters.user_name} onChange={(e) => handleFilterChange('user_name', e.target.value)} className="w-full bg-white border border-[#763c26]/10 rounded px-2 py-1 text-[10px] font-medium outline-none focus:border-[#763c26]/40" /></th>
+                    <th className="px-6 pb-4"><input type="text" placeholder="Filter phone..." value={filters.phone_number} onChange={(e) => handleFilterChange('phone_number', e.target.value)} className="w-full bg-white border border-[#763c26]/10 rounded px-2 py-1 text-[10px] font-medium outline-none focus:border-[#763c26]/40" /></th>
+                    <th className="px-6 pb-4"><input type="text" placeholder="Filter date..." value={filters.preferred_date_time} onChange={(e) => handleFilterChange('preferred_date_time', e.target.value)} className="w-full bg-white border border-[#763c26]/10 rounded px-2 py-1 text-[10px] font-medium outline-none focus:border-[#763c26]/40" /></th>
+                    <th className="px-6 pb-4"><input type="text" placeholder="Filter procedure..." value={filters.preferred_procedure} onChange={(e) => handleFilterChange('preferred_procedure', e.target.value)} className="w-full bg-white border border-[#763c26]/10 rounded px-2 py-1 text-[10px] font-medium outline-none focus:border-[#763c26]/40" /></th>
+                    <th className="px-6 pb-4"><input type="text" placeholder="Filter duration..." value={filters.duration_ms} onChange={(e) => handleFilterChange('duration_ms', e.target.value)} className="w-full bg-white border border-[#763c26]/10 rounded px-2 py-1 text-[10px] font-medium outline-none focus:border-[#763c26]/40" /></th>
+                    <th className="px-6 pb-4"><input type="text" placeholder="Filter status..." value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)} className="w-full bg-white border border-[#763c26]/10 rounded px-2 py-1 text-[10px] font-medium outline-none focus:border-[#763c26]/40" /></th>
+                    <th className="px-6 pb-4">
+                      <select value={filters.action_status} onChange={(e) => handleFilterChange('action_status', e.target.value)} className="w-full bg-white border border-[#763c26]/10 rounded px-2 py-1 text-[10px] font-medium outline-none focus:border-[#763c26]/40 appearance-none">
+                        <option value="">All Steps</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Scheduled">Scheduled</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </th>
+                    <th className="px-6 pb-4"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#763c26]/5">
@@ -349,6 +428,18 @@ const LogsPage = () => {
                           {log.status === 'completed' || log.status === 'ended' ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
                           {log.status}
                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <select 
+                          value={log.action_status || 'Pending'} 
+                          onChange={(e) => updateActionStatus(log.id, e.target.value as CallLog['action_status'])}
+                          className={`w-full outline-none px-3 py-1.5 rounded-md text-[10px] font-bold tracking-wider uppercase transition-colors border cursor-pointer appearance-none ${getActionColor(log.action_status || 'Pending')}`}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Scheduled">Scheduled</option>
+                          <option value="Follow-up">Follow-up</option>
+                          <option value="Cancelled">Cancelled</option>
+                        </select>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
