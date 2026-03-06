@@ -126,14 +126,27 @@ const LogsPage = () => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const updateActionStatus = (logId: string, newStatus: CallLog['action_status']) => {
-    // Optimistic UI update
+  const updateActionStatus = async (logId: string, newStatus: CallLog['action_status']) => {
+    // 1. Optimistic UI update
     setLogs(prevLogs => prevLogs.map(log => 
       log.id === logId ? { ...log, action_status: newStatus } : log
     ));
     
-    // Here you would also add the Supabase update call when the DB is ready:
-    // await supabase.from('retell_ai_calls').update({ action_status: newStatus }).eq('id', logId);
+    // 2. Persist to Supabase
+    try {
+      const { error } = await supabase
+        .from('retell_ai_calls')
+        .update({ action_status: newStatus })
+        .eq('id', logId);
+
+      if (error) {
+        console.error('Failed to update action_status in Supabase:', error);
+        // Optional: Revert the UI update if needed here
+        alert('Failed to save status. Please try again.');
+      }
+    } catch (err) {
+      console.error('Unexpected error saving to Supabase:', err);
+    }
   };
 
   useEffect(() => {
