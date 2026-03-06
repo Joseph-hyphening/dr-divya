@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideIcon, X, Menu } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 // Define the props interface for type safety and reusability
@@ -91,7 +92,7 @@ export const MinimalistHero = ({
           transition={{ duration: 0.5 }}
           className="text-xl font-bold tracking-wider"
         >
-          {logoText}
+          <Link href="/">{logoText}</Link>
         </motion.div>
 
         <div className="flex items-center gap-6">
@@ -157,7 +158,9 @@ export const MinimalistHero = ({
               className="absolute right-0 top-0 h-full w-[75%] max-w-xs bg-background shadow-2xl flex flex-col"
             >
               <div className="flex items-center justify-between px-6 py-6 border-b border-border">
-                <span className="text-lg font-bold tracking-wider">{logoText}</span>
+                <Link href="/" className="text-lg font-bold tracking-wider" onClick={() => setMobileMenuOpen(false)}>
+                  {logoText}
+                </Link>
                 <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
                   <X className="h-6 w-6 text-foreground/60" />
                 </button>
