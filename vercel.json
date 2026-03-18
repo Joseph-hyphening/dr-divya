@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/retell/auto-sync",
-      "schedule": "0 */2 * * *"
-    }
-  ]
-}
