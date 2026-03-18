@@ -3,6 +3,7 @@
 import React from 'react';
 import { Facebook, Instagram, Twitter, Linkedin } from 'lucide-react';
 import { MinimalistHero } from '@/components/ui/minimalist-hero';
+import Image from 'next/image';
 import { AboutSection } from '@/components/sections/About';
 import { ServicesSection } from '@/components/sections/Services';
 import { FooterSection } from '@/components/sections/Footer';
@@ -33,7 +34,7 @@ const MinimalistHeroDemo = () => {
   return (
     <main className="min-h-screen flex flex-col relative bg-background">
       <MinimalistHero
-        logoText="Dr. Divya's"
+        logoText={<Image src="/logo.svg" alt="Dr. Divya's" width={140} height={32} className="h-8 w-auto object-contain" priority />}
         navLinks={navLinks}
         loginLink="/login"
         mainText="Dr. Divya Sharma, MBBS (Gold Medalist), MD (Skin). Bangalore's award-winning dermatologist with 12+ years of clinical excellence and US FDA approved technology."

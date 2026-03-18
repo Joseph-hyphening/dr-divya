@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import Retell from 'retell-sdk';
 import { supabase } from '@/lib/supabase';
 
@@ -6,46 +6,46 @@ const retell = new Retell({
   apiKey: process.env.RETELL_API_KEY || '',
 });
 
-export async function POST(req: NextRequest) {
+/**
+ * GET /api/retell/auto-sync
+ *
+ * Intended to be called by Vercel Cron every 2 hours.
+ * Vercel Cron config is in vercel.json.
+ *
+ * It syncs all recent Retell AI calls into the Supabase `retell_ai_calls` table,
+ * populating: call_received_at, preferred_date, preferred_time.
+ */
+export async function GET() {
   try {
-    // 1. Fetch recent calls from Retell
     const calls = await retell.call.list({ limit: 50 });
 
     if (!calls || !Array.isArray(calls)) {
       return NextResponse.json({ error: 'Failed to fetch calls from Retell' }, { status: 500 });
     }
 
-    const results = {
-      added: 0,
-      updated: 0,
-      errors: 0,
-    };
+    const results = { added: 0, updated: 0, errors: 0 };
 
-    // 2. Process each call and upsert to Supabase
     for (const call of calls) {
       try {
-        // call_analysis contains post-call extracted data
         const callAnalysis = (call as any).call_analysis;
-        
-        // Handle custom variables safely
         const customVars = (callAnalysis as any)?.custom_analysis_data || {};
-        
+
         const userName = (customVars as any)?.user_name || 'Unknown';
-        
-        // from_number and to_number are only on PhoneCallResponse
         const phoneNumber = (call as any).from_number || (call as any).to_number || 'Web Call';
-        
         const preferredProcedure = (customVars as any)?.preferred_procedure || 'N/A';
-        
-        // call_received_at = actual timestamp the call was received
-        const startTimeStr = call.start_timestamp ? new Date(call.start_timestamp).toISOString() : new Date().toISOString();
+
+        const startTimeStr = call.start_timestamp
+          ? new Date(call.start_timestamp).toISOString()
+          : new Date().toISOString();
+
+        // call_received_at = the actual timestamp the call came in
         const callReceivedAt = startTimeStr;
 
         // Split preferred_date and preferred_time from custom vars
         const rawPreferredDate = (customVars as any)?.preferred_date || '';
         const rawPreferredTime = (customVars as any)?.preferred_time || '';
 
-        // Fallback: if old combined field was used, split it
+        // Fallback: if the old combined field was used, try to split it
         const rawCombined = (customVars as any)?.preferred_date_time || '';
         const preferredDate = rawPreferredDate || (rawCombined ? rawCombined.split('T')[0] : '');
         const preferredTime = rawPreferredTime || (rawCombined ? rawCombined.split('T')[1]?.split('.')[0] || '' : '');
@@ -54,7 +54,6 @@ export async function POST(req: NextRequest) {
         const status = call.call_status || 'unknown';
         const transcript = call.transcript || '';
 
-        // Upsert based on call_id
         const { error } = await supabase
           .from('retell_ai_calls')
           .upsert(
@@ -75,28 +74,30 @@ export async function POST(req: NextRequest) {
           );
 
         if (error) {
-          console.error(`Error upserting call ${call.call_id}:`, error);
+          console.error(`[auto-sync] Error upserting call ${call.call_id}:`, error);
           results.errors++;
         } else {
           results.added++;
         }
       } catch (err) {
-        console.error(`Processing error for call ${call.call_id}:`, err);
+        console.error(`[auto-sync] Processing error for call ${call.call_id}:`, err);
         results.errors++;
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: `Sync complete. Processed ${calls.length} calls.`,
-      stats: results 
-    });
+    console.log(`[auto-sync] Completed at ${new Date().toISOString()}:`, results);
 
+    return NextResponse.json({
+      success: true,
+      message: `Auto-sync complete. Processed ${calls.length} calls.`,
+      stats: results,
+      syncedAt: new Date().toISOString(),
+    });
   } catch (error: any) {
-    console.error('Retell Sync Error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error during sync', 
-      details: error.message 
-    }, { status: 500 });
+    console.error('[auto-sync] Error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error during auto-sync', details: error.message },
+      { status: 500 }
+    );
   }
 }

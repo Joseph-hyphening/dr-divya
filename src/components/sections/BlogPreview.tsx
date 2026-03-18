@@ -30,7 +30,7 @@ export const BlogPreview = () => {
   return (
     <section className="bg-white py-24 px-8 md:px-12">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-16 flex flex-col md:flex-row items-end justify-between gap-8">
+        <header className="mb-16 flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
           <div className="max-w-xl">
             <h2 className="text-sm uppercase tracking-[0.3em] font-bold text-brand-accent mb-4">Education Hub</h2>
             <h3 className="text-4xl md:text-5xl font-bold leading-tight">Latest from <br /><span className="text-brand-accent italic font-serif">The Authority</span></h3>

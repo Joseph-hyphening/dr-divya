@@ -2,6 +2,7 @@
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import Autoplay from "embla-carousel-autoplay";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -93,6 +94,12 @@ const Gallery4 = ({
       <div className="w-full">
         <Carousel
           setApi={setCarouselApi}
+          plugins={[
+            Autoplay({
+              delay: 3000,
+              stopOnInteraction: false,
+            }),
+          ]}
           opts={{
             align: "start",
             breakpoints: {

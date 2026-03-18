@@ -2,13 +2,23 @@
 
 import React from 'react';
 import { Mail, MapPin, Phone, Instagram, Facebook, Twitter } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export const FooterSection = () => {
   return (
     <footer className="bg-foreground text-background py-20 px-8 md:px-12 mt-auto">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-12">
         <div className="lg:col-span-2">
-          <h2 className="text-3xl font-bold tracking-tighter mb-6">Dr. Divya&apos;s</h2>
+          <Link href="/" className="inline-block mb-6">
+            <Image 
+              src="/logo.svg" 
+              alt="Dr. Divya's" 
+              width={160} 
+              height={37} 
+              className="h-10 w-auto brightness-0 invert object-contain" 
+            />
+          </Link>
           <p className="max-w-md text-background/60 leading-relaxed">
             Pioneering the future of dermatology with a blend of clinical mastery and aesthetic artistry. 
             Gold medalist care, now accessible in Bangalore.

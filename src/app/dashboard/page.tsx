@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { 
   LayoutDashboard, 
   BarChart3, 
@@ -14,7 +15,9 @@ import {
   ArrowUpRight,
   TrendingUp,
   Clock,
-  Plus
+  Plus,
+  Calendar,
+  Share2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -24,6 +27,8 @@ const DashboardPage = () => {
     // { icon: BarChart3, label: 'ANALYTICS', href: '#', active: false },
     // { icon: Layers, label: 'PROJECTS', href: '#', active: false },
     { icon: Clock, label: 'CALL LOGS', href: '/dashboard/logs', active: false },
+    { icon: Calendar, label: 'WEBSITE BOOKINGS', href: '/dashboard/bookings', active: false },
+    { icon: Share2, label: 'SOCIAL MEDIA', href: '/dashboard/social-media', active: false },
     // { icon: Settings, label: 'SETTINGS', href: '#', active: false },
   ];
 
@@ -46,10 +51,16 @@ const DashboardPage = () => {
         initial={{ x: -100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="w-64 border-r border-[#763c26]/10 flex flex-col p-8 z-20"
+        className="hidden md:flex w-64 border-r border-[#763c26]/10 flex flex-col p-8 z-20"
       >
-        <div className="text-xl font-bold tracking-wider mb-12">
-          mnmlst.
+        <div className="mb-12">
+          <Image 
+            src="/logo.svg" 
+            alt="Logo" 
+            width={120} 
+            height={40} 
+            className="w-auto h-8"
+          />
         </div>
         
         <nav className="flex-grow space-y-8">
@@ -67,20 +78,24 @@ const DashboardPage = () => {
           ))}
         </nav>
 
-        <Link 
-          href="/" 
-          className="flex items-center space-x-4 text-xs font-bold tracking-[0.2em] text-[#1a1a1a]/40 hover:text-red-500 transition-colors"
+        <button 
+          onClick={async () => {
+            const { supabase } = await import('@/lib/supabase');
+            await supabase.auth.signOut();
+          }}
+          className="w-full flex items-center space-x-4 text-xs font-bold tracking-[0.2em] text-[#1a1a1a]/40 hover:text-red-500 transition-colors"
         >
           <LogOut className="h-4 w-4" />
           <span>SIGN OUT</span>
-        </Link>
+        </button>
       </motion.aside>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col overflow-y-auto">
+      <main className="flex-grow flex flex-col overflow-y-auto pb-20 md:pb-0">
         {/* Header */}
-        <header className="h-20 border-b border-[#763c26]/10 flex items-center justify-between px-12 z-10 sticky top-0 bg-[#faf7f3]/80 backdrop-blur-md">
-          <div className="flex items-center bg-[#1a1a1a]/5 px-4 py-2 rounded-full w-96">
+        <header className="h-16 md:h-20 border-b border-[#763c26]/10 flex items-center justify-between px-4 md:px-12 z-10 sticky top-0 bg-[#faf7f3]/80 backdrop-blur-md">
+          <Image src="/logo.svg" alt="Logo" width={80} height={24} className="md:hidden w-auto h-6" />
+          <div className="hidden md:flex items-center bg-[#1a1a1a]/5 px-4 py-2 rounded-full w-96">
             <Search className="h-4 w-4 text-[#1a1a1a]/40 mr-2" />
             <input 
               type="text" 
@@ -94,28 +109,43 @@ const DashboardPage = () => {
               <Bell className="h-5 w-5" />
               <span className="absolute top-2 right-2 h-2 w-2 bg-[#763c26] rounded-full border-2 border-[#faf7f3]"></span>
             </button>
-            <div className="flex items-center space-x-3 cursor-pointer group">
+            <div className="flex items-center space-x-4 cursor-pointer group hover:bg-[#1a1a1a]/5 px-4 py-2 rounded-full transition-all">
               <div className="text-right">
-                <p className="text-[10px] font-bold tracking-[0.2em] group-hover:text-[#763c26] transition-colors">ALEX RIVERA</p>
-                <p className="text-[8px] font-medium tracking-widest text-[#1a1a1a]/40">CREATIVE DIRECTOR</p>
+                <p className="text-xs font-bold tracking-wider group-hover:text-[#763c26] transition-colors">Hi, Dr. Divya's Team</p>
+                <p className="text-[9px] font-bold tracking-[0.2em] text-[#1a1a1a]/40 mt-0.5 uppercase">Admin Portal</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-[#763c26]/10 flex items-center justify-center border border-[#763c26]/20 group-hover:border-[#763c26] transition-all overflow-hidden">
-                <User className="h-5 w-5 text-[#763c26]" />
+              <div className="h-10 w-10 rounded-full bg-[#763c26]/10 flex items-center justify-center border border-[#763c26]/20 group-hover:bg-[#763c26] group-hover:border-[#763c26] transition-all overflow-hidden shadow-sm">
+                <User className="h-5 w-5 text-[#763c26] group-hover:text-white transition-colors" />
               </div>
             </div>
           </div>
         </header>
 
+        
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#763c26]/10 flex justify-around items-center p-2 z-50 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+        {sidebarItems.map((item, index) => (
+          <Link 
+            key={index} 
+            href={item.href} 
+            className={`flex flex-col items-center p-2 rounded-lg transition-colors ${item.active ? 'text-[#763c26]' : 'text-[#1a1a1a]/40'}`}
+          >
+            <item.icon className="h-5 w-5 mb-1" />
+            <span className="text-[8px] font-bold tracking-wider">{item.label.split(' ')[0]}</span>
+          </Link>
+        ))}
+      </div>
+
         {/* Dashboard Content */}
-        <div className="p-12 space-y-12">
+        <div className="p-4 md:p-12 space-y-8 md:space-y-12">
           {/* Welcome Section */}
-          <div className="flex justify-between items-end">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <h1 className="text-5xl font-extrabold tracking-tight mb-2">overview.</h1>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-2">overview.</h1>
               <p className="text-sm font-medium tracking-widest text-[#1a1a1a]/40 uppercase">Wednesday, March 03</p>
             </motion.div>
             <motion.button
@@ -195,7 +225,7 @@ const DashboardPage = () => {
             >
               <div className="relative z-10">
                 <h3 className="text-sm font-bold tracking-[0.2em] mb-10 text-white/60">PERFORMANCE PREVIEW</h3>
-                <p className="text-4xl font-extrabold mb-4 leading-tight">Your growth has <br />surpassed expectations.</p>
+                <p className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight">Your growth has <br />surpassed expectations.</p>
                 <p className="text-xs font-medium tracking-widest text-white/40 max-w-xs leading-relaxed">
                   Based on our latest minimalist analysis, your active projects are performing 15% better than the industry average.
                 </p>

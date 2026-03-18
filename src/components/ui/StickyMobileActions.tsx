@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Phone, MessageCircle } from 'lucide-react';
+import { Phone, Calendar } from 'lucide-react';
 
 export const StickyMobileActions = () => {
   return (
@@ -20,11 +20,12 @@ export const StickyMobileActions = () => {
         <button
           className="flex-1 h-14 bg-[#25D366] text-white flex items-center justify-center gap-2 active:opacity-80 transition-opacity"
           onClick={() => {
-            window.location.href = 'https://wa.me/919620638388';
+            const section = document.getElementById('ai-assistant');
+            if (section) section.scrollIntoView({ behavior: 'smooth' });
           }}
         >
-          <MessageCircle className="h-4 w-4" />
-          <span className="text-sm font-bold uppercase tracking-wider">WhatsApp</span>
+          <Calendar className="h-4 w-4" />
+          <span className="text-sm font-bold uppercase tracking-wider">Book Now</span>
         </button>
       </div>
     </div>

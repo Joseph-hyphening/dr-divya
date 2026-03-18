@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Star } from 'lucide-react';
 
 const galleryItems = [
   {
@@ -11,30 +11,62 @@ const galleryItems = [
     desc: "3-month transformation using custom medical lasers.",
     before: "https://placehold.co/600x400/763c26/ffffff?text=Acne+Before",
     after: "https://placehold.co/600x400/faf7f3/763c26?text=Acne+After",
-    category: "Clinical"
+    category: "Clinical",
+    review: {
+      text: "Thank you so much, Dr. Divya Ma’am, for curing my acne in such a short time. Your treatment was extremely effective, and your guidance made the whole process easy and comfortable.",
+      name: "Mayookh K",
+      location: "Verified Patient"
+    }
   },
   {
     title: "Natural Hair Regrowth",
     after: "https://placehold.co/600x400/faf7f3/763c26?text=Hair+Result",
     before: "https://placehold.co/600x400/763c26/ffffff?text=Hair+Before",
     desc: "PRP & Hair Transplant combination therapy.",
-    category: "Trichology"
+    category: "Trichology",
+    review: {
+      text: "I visited Dr. Divya mam for a hair loss problem. She gave treatment for 1 month, and I can see new hair growth. I'm very satisfied with the treatment and results.",
+      name: "Geeverghese M B",
+      location: "Verified Patient"
+    }
   },
   {
     title: "Anti-Aging Results",
     desc: "US FDA approved fillers and skin tightening.",
     after: "https://placehold.co/600x400/faf7f3/763c26?text=Aging+Result",
     before: "https://placehold.co/600x400/763c26/ffffff?text=Aging+Before",
-    category: "Cosmetic"
+    category: "Cosmetic",
+    review: {
+      text: "Dr. Divya is a soft-spoken and good doctor. Had laser toning done for uneven skin tone. Had great experience there. Do recommend whoever is facing any skin or hair related issues.",
+      name: "Swati Das",
+      location: "Verified Patient"
+    }
   }
 ];
 
 export const GallerySlider = () => {
   const [index, setIndex] = useState(0);
   const [sliderPos, setSliderPos] = useState(50);
+  const [autoPlay, setAutoPlay] = useState(true);
 
-  const next = () => setIndex((prev) => (prev + 1) % galleryItems.length);
-  const prev = () => setIndex((prev) => (prev - 1 + galleryItems.length) % galleryItems.length);
+  useEffect(() => {
+    if (!autoPlay) return;
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % galleryItems.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [autoPlay]);
+
+  const handleInteraction = () => setAutoPlay(false);
+
+  const next = () => {
+    handleInteraction();
+    setIndex((prev) => (prev + 1) % galleryItems.length);
+  };
+  const prev = () => {
+    handleInteraction();
+    setIndex((prev) => (prev - 1 + galleryItems.length) % galleryItems.length);
+  };
 
   return (
     <section className="bg-white py-24 px-8 md:px-12 overflow-hidden">
@@ -63,6 +95,7 @@ export const GallerySlider = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
               className="relative aspect-[3/2] rounded-[2rem] overflow-hidden bg-brand-accent/5 group shadow-2xl"
+              onClick={handleInteraction}
             >
               {/* After Image */}
               <Image src={galleryItems[index].after} alt={galleryItems[index].title} fill className="object-cover" />
@@ -86,7 +119,10 @@ export const GallerySlider = () => {
                 min="0" 
                 max="100" 
                 value={sliderPos}
-                onChange={(e) => setSliderPos(Number(e.target.value))}
+                onChange={(e) => {
+                  handleInteraction();
+                  setSliderPos(Number(e.target.value));
+                }}
                 className="absolute inset-0 opacity-0 cursor-ew-resize z-30"
               />
               <div 
@@ -121,16 +157,29 @@ export const GallerySlider = () => {
               </p>
             </motion.div>
             
-            <div className="p-8 bg-brand-accent/[0.03] rounded-3xl border border-brand-accent/5">
-              <p className="italic text-foreground/80 leading-relaxed mb-6">&quot;The transformation exceeded my expectations. Dr. Divya&apos;s approach is gentle yet incredibly effective.&quot;</p>
+            <motion.div 
+              key={`review-${index}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              className="p-8 bg-brand-accent/[0.03] rounded-3xl border border-brand-accent/5 flex flex-col"
+            >
+              <div className="flex gap-1 mb-5 text-[#FDB022]">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-5 h-5 fill-current" />
+                ))}
+              </div>
+              <p className="italic text-foreground/80 leading-relaxed mb-6">&quot;{galleryItems[index].review.text}&quot;</p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-brand-accent/10" />
+                <div className="w-12 h-12 rounded-full bg-brand-accent/10 flex items-center justify-center text-brand-accent font-bold text-lg">
+                  {galleryItems[index].review.name.charAt(0)}
+                </div>
                 <div>
-                  <p className="font-bold">Happy Patient</p>
-                  <p className="text-xs opacity-40 uppercase tracking-widest font-medium">Bangalore, AECS Layout</p>
+                  <p className="font-bold">{galleryItems[index].review.name}</p>
+                  <p className="text-xs opacity-40 uppercase tracking-widest font-medium">{galleryItems[index].review.location}</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

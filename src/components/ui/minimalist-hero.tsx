@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 // Define the props interface for type safety and reusability
 interface MinimalistHeroProps {
-  logoText: string;
+  logoText: React.ReactNode;
   navLinks: { label: string; href: string }[];
   loginLink?: string;
   mainText: string;
@@ -92,7 +92,7 @@ export const MinimalistHero = ({
           transition={{ duration: 0.5 }}
           className="text-xl font-bold tracking-wider"
         >
-          <Link href="/">{logoText}</Link>
+          <Link href="/" className="flex items-center">{logoText}</Link>
         </motion.div>
 
         <div className="flex items-center gap-6">
@@ -158,7 +158,7 @@ export const MinimalistHero = ({
               className="absolute right-0 top-0 h-full w-[75%] max-w-xs bg-background shadow-2xl flex flex-col"
             >
               <div className="flex items-center justify-between px-6 py-6 border-b border-border">
-                <Link href="/" className="text-lg font-bold tracking-wider" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/" className="flex items-center text-lg font-bold tracking-wider" onClick={() => setMobileMenuOpen(false)}>
                   {logoText}
                 </Link>
                 <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
@@ -315,12 +315,12 @@ export const MinimalistHero = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.2 }}
-          className="z-10 flex items-center justify-start -ml-4 lg:-ml-12"
+          className="z-20 flex items-center justify-center text-center md:justify-start"
         >
-          <h1 className="text-[clamp(4rem,7vw,7.5rem)] lg:text-[clamp(5rem,8vw,9.5rem)] font-extrabold text-white leading-[0.85] tracking-tight whitespace-nowrap" style={{ textShadow: '0 4px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)' }}>
+          <h1 className="text-7xl font-extrabold text-white md:text-8xl lg:text-9xl leading-[0.9]" style={{ textShadow: '0 4px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)' }}>
             {overlayText.part1}
             <br />
-            <span className="ml-4 md:ml-8">{overlayText.part2}</span>
+            {overlayText.part2}
           </h1>
         </motion.div>
       </div>

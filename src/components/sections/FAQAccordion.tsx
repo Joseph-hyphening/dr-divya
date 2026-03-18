@@ -15,7 +15,7 @@ const faqs = [
   },
   {
     q: "Do you offer virtual consultations?",
-    a: "Yes! We offer high-definition virtual consultations for patients who cannot travel to Whitefield. You can book these via the AI Assistant or our contact page."
+    a: "Yes! We offer high-definition virtual consultations for patients who cannot travel to Whitefield. You can book these via the Clinic Assistant or our contact page."
   },
   {
     q: "Where is the clinic located in Whitefield?",

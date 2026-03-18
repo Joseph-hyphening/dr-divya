@@ -1,18 +1,41 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 const LoginPage = () => {
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login and redirect
-    router.push('/dashboard');
+    if (!email || !password) return;
+    
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+      
+      router.push('/dashboard');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message || 'Failed to sign in. Please check your credentials.');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,6 +78,17 @@ const LoginPage = () => {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSignIn}>
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="flex items-center space-x-2 rounded-lg bg-red-50 p-4 text-sm text-red-600 border border-red-100"
+            >
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <p>{error}</p>
+            </motion.div>
+          )}
+
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-xs font-bold uppercase tracking-widest text-foreground/70">
@@ -65,7 +99,10 @@ const LoginPage = () => {
                 name="email"
                 type="email"
                 required
-                className="mt-1 block w-full border-b-2 border-foreground/10 bg-transparent py-3 text-foreground placeholder-foreground/30 focus:border-brand-accent focus:outline-none transition-colors"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading}
+                className="mt-1 block w-full border-b-2 border-foreground/10 bg-transparent py-3 text-foreground placeholder-foreground/30 focus:border-brand-accent focus:outline-none transition-colors disabled:opacity-50"
                 placeholder="hello@example.com"
               />
             </div>
@@ -73,14 +110,30 @@ const LoginPage = () => {
               <label htmlFor="password" className="block text-xs font-bold uppercase tracking-widest text-foreground/70">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="mt-1 block w-full border-b-2 border-foreground/10 bg-transparent py-3 text-foreground placeholder-foreground/30 focus:border-brand-accent focus:outline-none transition-colors"
-                placeholder="••••••••"
-              />
+              <div className="relative mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  className="block w-full border-b-2 border-foreground/10 bg-transparent py-3 pr-10 text-foreground placeholder-foreground/30 focus:border-brand-accent focus:outline-none transition-colors disabled:opacity-50"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-foreground/40 hover:text-foreground transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -105,12 +158,24 @@ const LoginPage = () => {
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!isLoading ? { scale: 1.02 } : {}}
+            whileTap={!isLoading ? { scale: 0.98 } : {}}
             type="submit"
-            className="group relative flex w-full justify-center bg-brand-accent py-4 text-sm font-bold tracking-[0.2em] text-white transition-all hover:bg-brand-accent/90 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2"
+            disabled={isLoading}
+            className="group relative flex w-full justify-center bg-brand-accent py-4 text-sm font-bold tracking-[0.2em] text-white transition-all hover:bg-brand-accent/90 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            SIGN IN
+            {isLoading ? (
+              <span className="flex items-center space-x-2">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="h-4 w-4 rounded-full border-2 border-white border-t-transparent"
+                />
+                <span>SIGNING IN...</span>
+              </span>
+            ) : (
+              'SIGN IN'
+            )}
           </motion.button>
         </form>
 
