@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, 
   Clock, 
@@ -19,11 +19,14 @@ import {
   Phone,
   Edit,
   Timer,
-  Share2
+  Share2,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import { useRole } from '@/lib/RoleContext';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 
 interface Booking {
   id: string;
@@ -34,6 +37,7 @@ interface Booking {
   preferred_procedure?: string;
   request_type: string;
   status: 'Pending' | 'Contacted' | 'Scheduled' | 'Cancelled';
+  cancellation_reason?: string;
   created_at: string;
 }
 
@@ -63,16 +67,34 @@ const BookingsPage = () => {
     status: ''
   });
 
-  const handleFilterChange = (key: keyof FilterState, value: string) => {
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState<string>('');
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  const cancelReasons = [
+    'Price',
+    'Time slot not available',
+    'Not interested anymore',
+    'Found another clinic',
+    'Other'
+  ];  const handleFilterChange = (key: keyof FilterState, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const sidebarItems = [
+  const { email } = useRole();
+  const allSidebarItems = [
     { icon: LayoutDashboard, label: 'OVERVIEW', href: '/dashboard', active: false },
     { icon: Clock, label: 'CALL LOGS', href: '/dashboard/logs', active: false },
     { icon: Calendar, label: 'WEBSITE BOOKINGS', href: '/dashboard/bookings', active: true },
     { icon: Share2, label: 'SOCIAL MEDIA', href: '/dashboard/social-media', active: false },
   ];
+
+  const sidebarItems = allSidebarItems.filter(item => 
+    email === 'reception@hypheningmedia.com' 
+      ? ['CALL LOGS', 'WEBSITE BOOKINGS'].includes(item.label) 
+      : true
+  );
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -110,17 +132,17 @@ const BookingsPage = () => {
     }
   };
 
-  const updateStatus = async (id: string, newStatus: Booking['status']) => {
+  const updateStatus = async (id: string, newStatus: Booking['status'], reason?: string) => {
     // Optimistic update
     setBookings(prev => prev.map(booking => 
-      booking.id === id ? { ...booking, status: newStatus } : booking
+      booking.id === id ? { ...booking, status: newStatus, cancellation_reason: newStatus === 'Cancelled' ? (reason || undefined) : undefined } : booking
     ));
 
     try {
       const res = await fetch('/api/bookings', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: newStatus })
+        body: JSON.stringify({ id, status: newStatus, cancellation_reason: reason })
       });
       const result = await res.json();
       if (!result.success) {
@@ -229,10 +251,7 @@ const BookingsPage = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <button className="relative p-2 text-[#1a1a1a]/60 hover:text-[#763c26] transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 h-2 w-2 bg-[#763c26] rounded-full border-2 border-[#faf7f3]"></span>
-            </button>
+            <NotificationBell />
             <div className="flex items-center space-x-4 cursor-pointer group hover:bg-[#1a1a1a]/5 px-4 py-2 rounded-full transition-all">
               <div className="text-right">
                 <p className="text-xs font-bold tracking-wider group-hover:text-[#763c26] transition-colors">Hi, Dr. Divya's Team</p>
@@ -403,7 +422,15 @@ const BookingsPage = () => {
                       <td className="px-6 py-4">
                         <select 
                           value={booking.status} 
-                          onChange={(e) => updateStatus(booking.id, e.target.value as Booking['status'])}
+                          onChange={(e) => {
+                            const newStatus = e.target.value as Booking['status'];
+                            if (newStatus === 'Cancelled') {
+                              setPendingCancelId(booking.id);
+                              setCancelModalOpen(true);
+                            } else {
+                              updateStatus(booking.id, newStatus);
+                            }
+                          }}
                           className={`w-full outline-none px-3 py-1.5 rounded-md text-[10px] font-bold tracking-wider uppercase transition-colors border cursor-pointer appearance-none ${getStatusStyle(booking.status)}`}
                         >
                           <option value="Pending">Pending</option>
@@ -420,9 +447,33 @@ const BookingsPage = () => {
                           >
                              <Edit className="h-3 w-3 text-[#763c26]" />
                           </button>
-                          <button className="p-2 hover:bg-black/5 rounded-lg transition-colors">
-                            <MoreHorizontal className="h-3 w-3 text-[#1a1a1a]/40" />
-                          </button>
+                          <div className="relative">
+                            <button 
+                              onClick={() => setOpenMenuId(openMenuId === booking.id ? null : booking.id)}
+                              className="p-2 hover:bg-black/5 rounded-lg transition-colors"
+                            >
+                              <MoreHorizontal className="h-3 w-3 text-[#1a1a1a]/40" />
+                            </button>
+                            {openMenuId === booking.id && (
+                              <div className="absolute right-0 top-8 z-30 w-52 bg-white rounded-2xl shadow-xl border border-[#763c26]/10 overflow-hidden text-left shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)]">
+                                <div className="px-4 py-3">
+                                  <p className="text-[9px] font-bold tracking-[0.2em] text-[#1a1a1a]/30 uppercase mb-2">Details</p>
+                                  <div className="flex flex-col space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-[10px] font-bold text-[#1a1a1a]/60 uppercase">Status</span>
+                                      <span className={`text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full ${getStatusStyle(booking.status)}`}>{booking.status}</span>
+                                    </div>
+                                    {booking.status === 'Cancelled' && booking.cancellation_reason && (
+                                      <div className="flex flex-col mt-2 pt-2 border-t border-[#763c26]/5">
+                                        <span className="text-[9px] font-bold text-[#1a1a1a]/40 uppercase mb-1">Cancellation Reason</span>
+                                        <span className="text-[11px] font-medium text-[#1a1a1a]">{booking.cancellation_reason}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -433,6 +484,88 @@ const BookingsPage = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Cancellation Modal */}
+      <AnimatePresence>
+        {cancelModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setCancelModalOpen(false);
+                setPendingCancelId(null);
+                setCancelReason('');
+              }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-[#763c26]/5 flex justify-between items-center bg-[#faf7f3]">
+                <h3 className="text-xs font-bold tracking-[0.2em] uppercase">Why was this cancelled?</h3>
+                <button 
+                  onClick={() => {
+                    setCancelModalOpen(false);
+                    setPendingCancelId(null);
+                    setCancelReason('');
+                  }}
+                  className="p-2 hover:bg-[#763c26]/10 rounded-full transition-colors"
+                >
+                  <X className="h-4 w-4 text-[#763c26]" />
+                </button>
+              </div>
+              
+              <div className="p-6 bg-white space-y-3">
+                {cancelReasons.map((reason) => (
+                  <button
+                    key={reason}
+                    onClick={() => setCancelReason(reason)}
+                    className={`w-full text-left px-4 py-3 rounded-xl border text-xs font-bold tracking-wider uppercase transition-all ${
+                      cancelReason === reason 
+                        ? 'bg-[#763c26] text-white border-[#763c26]' 
+                        : 'bg-white border-[#763c26]/10 text-[#1a1a1a]/60 hover:bg-[#faf7f3] hover:border-[#763c26]/30'
+                    }`}
+                  >
+                    {reason}
+                  </button>
+                ))}
+              </div>
+
+              <div className="p-6 border-t border-[#763c26]/5 flex justify-end space-x-4 bg-[#faf7f3]">
+                <button 
+                  onClick={() => {
+                    setCancelModalOpen(false);
+                    setPendingCancelId(null);
+                    setCancelReason('');
+                  }}
+                  className="px-6 py-2 bg-transparent text-[#1a1a1a]/40 text-[10px] font-bold tracking-widest hover:text-[#1a1a1a] transition-colors uppercase"
+                >
+                  Cancel
+                </button>
+                <button 
+                  disabled={!cancelReason}
+                  onClick={() => {
+                    if (pendingCancelId) {
+                      updateStatus(pendingCancelId, 'Cancelled', cancelReason);
+                    }
+                    setCancelModalOpen(false);
+                    setPendingCancelId(null);
+                    setCancelReason('');
+                  }}
+                  className="px-6 py-2 bg-[#763c26] text-white text-[10px] font-bold tracking-widest rounded-full hover:bg-[#5d2f1d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

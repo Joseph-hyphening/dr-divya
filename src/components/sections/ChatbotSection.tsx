@@ -26,7 +26,7 @@ const getNextDays = (count: number) => {
 };
 
 export const ChatbotSection = ({ isFloating = false }) => {
-  const [isOpen, setIsOpen] = useState(!isFloating);
+  const [isOpen, setIsOpen] = useState(true);
   const [step, setStep] = useState<Step>('init');
   const [messages, setMessages] = useState<Message[]>([
     { 

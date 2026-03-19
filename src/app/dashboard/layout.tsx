@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
+import { RoleContext } from '@/lib/RoleContext';
+import { NotificationProvider } from '@/lib/NotificationContext';
 
 export default function DashboardLayout({
   children,
@@ -13,9 +15,25 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
+
+    const handleSession = (session: any) => {
+      if (!session) {
+        router.replace('/login');
+        return;
+      }
+      const email = session.user.email;
+      setUserEmail(email);
+      
+      if (email === 'reception@hypheningmedia.com' && (pathname === '/dashboard' || pathname === '/dashboard/social-media')) {
+        router.replace('/dashboard/logs');
+      } else {
+        setIsLoading(false);
+      }
+    };
 
     const checkAuth = async () => {
       try {
@@ -23,15 +41,8 @@ export default function DashboardLayout({
         
         if (error) throw error;
 
-        if (!session) {
-          if (mounted) {
-            // Include current path to redirect back later if needed, though simple redirect is fine
-            router.replace('/login');
-          }
-        } else {
-          if (mounted) {
-            setIsLoading(false);
-          }
+        if (mounted) {
+          handleSession(session);
         }
       } catch (err) {
         console.error('Error checking auth session:', err);
@@ -46,8 +57,8 @@ export default function DashboardLayout({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session && mounted) {
-        router.replace('/login');
+      if (mounted) {
+        handleSession(session);
       }
     });
 
@@ -55,7 +66,7 @@ export default function DashboardLayout({
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, pathname]);
 
   if (isLoading) {
     return (
@@ -70,5 +81,11 @@ export default function DashboardLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <RoleContext.Provider value={{ email: userEmail }}>
+      <NotificationProvider>
+        {children}
+      </NotificationProvider>
+    </RoleContext.Provider>
+  );
 }

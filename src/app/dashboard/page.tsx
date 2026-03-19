@@ -20,9 +20,12 @@ import {
   Share2
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRole } from '@/lib/RoleContext';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 
 const DashboardPage = () => {
-  const sidebarItems = [
+  const { email } = useRole();
+  const allSidebarItems = [
     { icon: LayoutDashboard, label: 'OVERVIEW', href: '/dashboard', active: true },
     // { icon: BarChart3, label: 'ANALYTICS', href: '#', active: false },
     // { icon: Layers, label: 'PROJECTS', href: '#', active: false },
@@ -31,6 +34,12 @@ const DashboardPage = () => {
     { icon: Share2, label: 'SOCIAL MEDIA', href: '/dashboard/social-media', active: false },
     // { icon: Settings, label: 'SETTINGS', href: '#', active: false },
   ];
+
+  const sidebarItems = allSidebarItems.filter(item => 
+    email === 'reception@hypheningmedia.com' 
+      ? ['CALL LOGS', 'WEBSITE BOOKINGS'].includes(item.label) 
+      : true
+  );
 
   const stats = [
     { label: 'TOTAL REACH', value: '124.5K', change: '+12.5%', icon: TrendingUp },
@@ -105,10 +114,7 @@ const DashboardPage = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <button className="relative p-2 text-[#1a1a1a]/60 hover:text-[#763c26] transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 h-2 w-2 bg-[#763c26] rounded-full border-2 border-[#faf7f3]"></span>
-            </button>
+            <NotificationBell />
             <div className="flex items-center space-x-4 cursor-pointer group hover:bg-[#1a1a1a]/5 px-4 py-2 rounded-full transition-all">
               <div className="text-right">
                 <p className="text-xs font-bold tracking-wider group-hover:text-[#763c26] transition-colors">Hi, Dr. Divya's Team</p>

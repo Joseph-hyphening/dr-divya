@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
-    const { id, status } = body;
+    const { id, status, cancellation_reason } = body;
 
     if (!id || !status) {
       return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest) {
 
     const { data, error } = await supabase
       .from('website_bookings')
-      .update({ status })
+      .update({ status, cancellation_reason: status === 'Cancelled' ? (cancellation_reason || null) : null })
       .eq('id', id)
       .select()
       .single();

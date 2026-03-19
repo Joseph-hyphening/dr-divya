@@ -26,6 +26,8 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
+import { useRole } from '@/lib/RoleContext';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 
 interface CallLog {
   id: string;
@@ -41,6 +43,7 @@ interface CallLog {
   transcript?: string;
   start_time: string;
   action_status?: 'Pending' | 'Scheduled' | 'Cancelled' | 'Follow-up';
+  cancellation_reason?: string;
 }
 
 interface FilterState {
@@ -63,12 +66,19 @@ const LogsPage = () => {
   const [selectedTranscript, setSelectedTranscript] = useState<string | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  const sidebarItems = [
+  const { email } = useRole();
+  const allSidebarItems = [
     { icon: LayoutDashboard, label: 'OVERVIEW', href: '/dashboard', active: false },
     { icon: Clock, label: 'CALL LOGS', href: '/dashboard/logs', active: true },
     { icon: Calendar, label: 'WEBSITE BOOKINGS', href: '/dashboard/bookings', active: false },
     { icon: Share2, label: 'SOCIAL MEDIA', href: '/dashboard/social-media', active: false },
   ];
+
+  const sidebarItems = allSidebarItems.filter(item => 
+    email === 'reception@hypheningmedia.com' 
+      ? ['CALL LOGS', 'WEBSITE BOOKINGS'].includes(item.label) 
+      : true
+  );
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -132,21 +142,33 @@ const LogsPage = () => {
     action_status: ''
   });
 
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [pendingCancelLogId, setPendingCancelLogId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState<string>('');
+
+  const cancelReasons = [
+    'Price',
+    'Time slot not available',
+    'Not interested anymore',
+    'Found another clinic',
+    'Other'
+  ];
+
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const updateActionStatus = async (logId: string, newStatus: CallLog['action_status']) => {
+  const updateActionStatus = async (logId: string, newStatus: CallLog['action_status'], reason?: string) => {
     // 1. Optimistic UI update
     setLogs(prevLogs => prevLogs.map(log => 
-      log.id === logId ? { ...log, action_status: newStatus } : log
+      log.id === logId ? { ...log, action_status: newStatus, cancellation_reason: newStatus === 'Cancelled' ? (reason || undefined) : undefined } : log
     ));
     
     // 2. Persist to Supabase
     try {
       const { error } = await supabase
         .from('retell_ai_calls')
-        .update({ action_status: newStatus })
+        .update({ action_status: newStatus, cancellation_reason: newStatus === 'Cancelled' ? (reason || null) : null })
         .eq('id', logId);
 
       if (error) {
@@ -265,10 +287,10 @@ const LogsPage = () => {
 
   const getActionColor = (status: CallLog['action_status'] | undefined) => {
     switch(status) {
-      case 'Scheduled': return 'bg-blue-50 text-blue-600 border-blue-200';
+      case 'Scheduled': return 'bg-emerald-50 text-emerald-600 border-emerald-200';
+      case 'Follow-up': return 'bg-blue-50 text-blue-600 border-blue-200';
       case 'Cancelled': return 'bg-red-50 text-red-600 border-red-200';
-      case 'Follow-up': return 'bg-orange-50 text-orange-600 border-orange-200';
-      default: return 'bg-gray-50 text-gray-600 border-gray-200'; // Pending
+      default: return 'bg-orange-50 text-orange-600 border-orange-200'; // Pending
     }
   };
 
@@ -334,10 +356,7 @@ const LogsPage = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <button className="relative p-2 text-[#1a1a1a]/60 hover:text-[#763c26] transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 h-2 w-2 bg-[#763c26] rounded-full border-2 border-[#faf7f3]"></span>
-            </button>
+            <NotificationBell />
             <div className="flex items-center space-x-4 cursor-pointer group hover:bg-[#1a1a1a]/5 px-4 py-2 rounded-full transition-all">
               <div className="text-right">
                 <p className="text-xs font-bold tracking-wider group-hover:text-[#763c26] transition-colors">Hi, Dr. Divya's Team</p>
@@ -518,7 +537,15 @@ const LogsPage = () => {
                       <td className="px-6 py-4">
                         <select 
                           value={log.action_status || 'Pending'} 
-                          onChange={(e) => updateActionStatus(log.id, e.target.value as CallLog['action_status'])}
+                          onChange={(e) => {
+                            const newStatus = e.target.value as CallLog['action_status'];
+                            if (newStatus === 'Cancelled') {
+                              setPendingCancelLogId(log.id);
+                              setCancelModalOpen(true);
+                            } else {
+                              updateActionStatus(log.id, newStatus);
+                            }
+                          }}
                           className={`w-full outline-none px-3 py-1.5 rounded-md text-[10px] font-bold tracking-wider uppercase transition-colors border cursor-pointer appearance-none ${getActionColor(log.action_status || 'Pending')}`}
                         >
                           <option value="Pending">Pending</option>
@@ -546,7 +573,7 @@ const LogsPage = () => {
                               <MoreHorizontal className="h-3 w-3 text-[#1a1a1a]/40" />
                             </button>
                             {openMenuId === log.id && (
-                              <div className="absolute right-0 top-8 z-30 w-52 bg-white rounded-2xl shadow-xl border border-[#763c26]/10 overflow-hidden">
+                              <div className="absolute right-0 top-8 z-30 w-52 bg-white rounded-2xl shadow-xl border border-[#763c26]/10 overflow-hidden text-left shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)]">
                                 <div className="px-4 py-3 border-b border-[#763c26]/5">
                                   <p className="text-[9px] font-bold tracking-[0.2em] text-[#1a1a1a]/30 uppercase mb-2">Call Details</p>
                                   <div className="flex items-center justify-between">
@@ -558,18 +585,27 @@ const LogsPage = () => {
                                   </div>
                                 </div>
                                 <div className="px-4 py-3">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-1.5 text-[11px] font-medium text-[#1a1a1a]/60">
-                                      {log.status === 'completed' || log.status === 'ended'
-                                        ? <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                                        : <XCircle className="h-3 w-3 text-red-400" />}
-                                      <span>Status</span>
+                                  <div className="flex flex-col space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center space-x-1.5 text-[11px] font-medium text-[#1a1a1a]/60">
+                                        {log.status === 'completed' || log.status === 'ended'
+                                          ? <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                                          : <XCircle className="h-3 w-3 text-red-400" />}
+                                        <span>Status</span>
+                                      </div>
+                                      <span className={`text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full ${
+                                        log.status === 'completed' || log.status === 'ended'
+                                          ? 'bg-emerald-50 text-emerald-600'
+                                          : 'bg-red-50 text-red-600'
+                                      }`}>{log.status}</span>
                                     </div>
-                                    <span className={`text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full ${
-                                      log.status === 'completed' || log.status === 'ended'
-                                        ? 'bg-emerald-50 text-emerald-600'
-                                        : 'bg-red-50 text-red-600'
-                                    }`}>{log.status}</span>
+                                    
+                                    {log.action_status === 'Cancelled' && log.cancellation_reason && (
+                                      <div className="flex flex-col mt-2 pt-2 border-t border-[#763c26]/5">
+                                        <span className="text-[9px] font-bold tracking-[0.2em] text-[#1a1a1a]/40 uppercase mb-1">Cancellation Reason</span>
+                                        <span className="text-[11px] font-medium text-[#1a1a1a]">{log.cancellation_reason}</span>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -623,6 +659,88 @@ const LogsPage = () => {
                   className="px-6 py-2 bg-[#763c26] text-white text-[10px] font-bold tracking-widest rounded-full hover:bg-[#5d2f1d] transition-colors"
                 >
                   CLOSE
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Cancellation Modal */}
+      <AnimatePresence>
+        {cancelModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setCancelModalOpen(false);
+                setPendingCancelLogId(null);
+                setCancelReason('');
+              }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-6 border-b border-[#763c26]/5 flex justify-between items-center bg-[#faf7f3]">
+                <h3 className="text-xs font-bold tracking-[0.2em] uppercase">Why was this cancelled?</h3>
+                <button 
+                  onClick={() => {
+                    setCancelModalOpen(false);
+                    setPendingCancelLogId(null);
+                    setCancelReason('');
+                  }}
+                  className="p-2 hover:bg-[#763c26]/10 rounded-full transition-colors"
+                >
+                  <X className="h-4 w-4 text-[#763c26]" />
+                </button>
+              </div>
+              
+              <div className="p-6 bg-white space-y-3">
+                {cancelReasons.map((reason) => (
+                  <button
+                    key={reason}
+                    onClick={() => setCancelReason(reason)}
+                    className={`w-full text-left px-4 py-3 rounded-xl border text-xs font-bold tracking-wider uppercase transition-all ${
+                      cancelReason === reason 
+                        ? 'bg-[#763c26] text-white border-[#763c26]' 
+                        : 'bg-white border-[#763c26]/10 text-[#1a1a1a]/60 hover:bg-[#faf7f3] hover:border-[#763c26]/30'
+                    }`}
+                  >
+                    {reason}
+                  </button>
+                ))}
+              </div>
+
+              <div className="p-6 border-t border-[#763c26]/5 flex justify-end space-x-4 bg-[#faf7f3]">
+                <button 
+                  onClick={() => {
+                    setCancelModalOpen(false);
+                    setPendingCancelLogId(null);
+                    setCancelReason('');
+                  }}
+                  className="px-6 py-2 bg-transparent text-[#1a1a1a]/40 text-[10px] font-bold tracking-widest hover:text-[#1a1a1a] transition-colors uppercase"
+                >
+                  Cancel
+                </button>
+                <button 
+                  disabled={!cancelReason}
+                  onClick={() => {
+                    if (pendingCancelLogId) {
+                      updateActionStatus(pendingCancelLogId, 'Cancelled', cancelReason);
+                    }
+                    setCancelModalOpen(false);
+                    setPendingCancelLogId(null);
+                    setCancelReason('');
+                  }}
+                  className="px-6 py-2 bg-[#763c26] text-white text-[10px] font-bold tracking-widest rounded-full hover:bg-[#5d2f1d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase"
+                >
+                  Confirm
                 </button>
               </div>
             </motion.div>

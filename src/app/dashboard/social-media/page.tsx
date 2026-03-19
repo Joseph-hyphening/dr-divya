@@ -13,6 +13,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   BarChart, Bar, Legend, LineChart, Line, PieChart, Pie, Cell, ComposedChart
 } from 'recharts';
+import { useRole } from '@/lib/RoleContext';
+import { NotificationBell } from '@/components/ui/NotificationBell';
 
 // Global Overview Data
 const overviewPerformanceData = [
@@ -55,23 +57,36 @@ const youtubeAnalyticsData = [
 
 // GMB Data
 const gmbMoMData = [
-  { name: 'Jan', searches: 4200, interactions: 850 },
-  { name: 'Feb', searches: 4800, interactions: 920 },
-  { name: 'Mar', searches: 5600, interactions: 1100 },
-  { name: 'Apr', searches: 6200, interactions: 1450 },
-  { name: 'May', searches: 7800, interactions: 1800 },
-  { name: 'Jun', searches: 9400, interactions: 2200 },
+  { name: 'Jan', searches: 4200, interactions: 850, calls: 320, website: 530 },
+  { name: 'Feb', searches: 4800, interactions: 920, calls: 380, website: 540 },
+  { name: 'Mar', searches: 5600, interactions: 1100, calls: 450, website: 650 },
+  { name: 'Apr', searches: 6200, interactions: 1450, calls: 520, website: 930 },
+  { name: 'May', searches: 7800, interactions: 1800, calls: 680, website: 1120 },
+  { name: 'Jun', searches: 9400, interactions: 2200, calls: 842, website: 1358 },
+  { name: 'Jul', searches: 10500, interactions: 2500, calls: 950, website: 1550 },
+  { name: 'Aug', searches: 11200, interactions: 2750, calls: 1020, website: 1730 },
+  { name: 'Sep', searches: 12100, interactions: 3100, calls: 1150, website: 1950 },
+  { name: 'Oct', searches: 13400, interactions: 3450, calls: 1280, website: 2170 },
+  { name: 'Nov', searches: 14800, interactions: 3900, calls: 1450, website: 2450 },
+  { name: 'Dec', searches: 16500, interactions: 4400, calls: 1680, website: 2720 },
 ];
 
 const SocialMediaPage = () => {
   const [activeTab, setActiveTab] = useState('Overview');
 
-  const sidebarItems = [
+  const { email } = useRole();
+  const allSidebarItems = [
     { icon: LayoutDashboard, label: 'OVERVIEW', href: '/dashboard', active: false },
     { icon: Clock, label: 'CALL LOGS', href: '/dashboard/logs', active: false },
     { icon: Calendar, label: 'WEBSITE BOOKINGS', href: '/dashboard/bookings', active: false },
     { icon: Share2, label: 'SOCIAL MEDIA', href: '/dashboard/social-media', active: true },
   ];
+
+  const sidebarItems = allSidebarItems.filter(item => 
+    email === 'reception@hypheningmedia.com' 
+      ? ['CALL LOGS', 'WEBSITE BOOKINGS'].includes(item.label) 
+      : true
+  );
 
   const StatCard = ({ title, value, change, icon: Icon, trend, color = 'text-[#763c26]', bg = 'group-hover:bg-[#763c26]/10' }: any) => (
     <motion.div
@@ -382,6 +397,23 @@ const SocialMediaPage = () => {
           </div>
         </div>
       </div>
+
+      <div className="bg-white p-8 rounded-3xl border border-[#763c26]/5 shadow-sm">
+        <h3 className="text-xs font-bold tracking-[0.2em] uppercase mb-6">MoM Growth: Calls vs Website Interactions</h3>
+        <div className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={gmbMoMData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af', fontWeight: 'bold' }} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#9ca3af', fontWeight: 'bold' }} dx={-10} />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', paddingTop: '10px' }} />
+              <RechartsTooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} />
+              <Bar dataKey="calls" name="Calls Done" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar dataKey="website" name="Website Interactions" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={20} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </motion.div>
   );
 
@@ -442,9 +474,7 @@ const SocialMediaPage = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <button className="relative p-2 text-[#1a1a1a]/60 hover:text-[#763c26] transition-colors">
-              <Bell className="h-5 w-5" />
-            </button>
+            <NotificationBell />
             <div className="flex items-center space-x-4 cursor-pointer group hover:bg-[#1a1a1a]/5 px-4 py-2 rounded-full transition-all">
               <div className="text-right">
                 <p className="text-xs font-bold tracking-wider group-hover:text-[#763c26] transition-colors">Hi, Dr. Divya's Team</p>
@@ -476,7 +506,7 @@ const SocialMediaPage = () => {
         <div className="p-4 md:p-12 pb-24 space-y-8">
           <div className="flex items-center justify-between mb-4">
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Performance Analytics</h1>
+              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">performance analytics.</h1>
               <p className="text-xs font-medium tracking-widest text-[#1a1a1a]/50 uppercase">Consolidated view of your digital presence</p>
             </motion.div>
             
