@@ -22,6 +22,7 @@ interface MinimalistHeroProps {
   socialLinks: { icon: LucideIcon; href: string }[];
   locationText: string;
   className?: string;
+  hideHeader?: boolean;
 }
 
 // Helper component for navigation links
@@ -74,6 +75,7 @@ export const MinimalistHero = ({
   socialLinks,
   locationText,
   className,
+  hideHeader = false,
 }: MinimalistHeroProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -84,56 +86,58 @@ export const MinimalistHero = ({
         className,
       )}
     >
-      {/* Header */}
-      <header className="z-30 flex w-full max-w-7xl items-center justify-between px-6 py-6 md:px-12 md:py-8">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-xl font-bold tracking-wider"
-        >
-          <Link href="/" className="flex items-center">{logoText}</Link>
-        </motion.div>
-
-        <div className="flex items-center gap-6">
-          {/* Desktop Nav */}
-          <div className="hidden items-center space-x-8 md:flex">
-            {navLinks.map((link) => (
-              <NavLink key={link.label} href={link.href}>
-                {link.label}
-              </NavLink>
-            ))}
-          </div>
-
-          {loginLink && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="hidden md:block"
-            >
-              <a
-                href={loginLink}
-                className="text-sm font-bold tracking-widest text-foreground transition-all hover:opacity-70 border-b-2 border-brand-accent pb-0.5"
-              >
-                LOGIN
-              </a>
-            </motion.div>
-          )}
-
-          {/* Mobile Hamburger */}
-          <motion.button
-            initial={{ opacity: 0, x: 20 }}
+      {/* Header (conditionally rendered) */}
+      {!hideHeader && (
+        <header className="z-30 flex w-full max-w-7xl items-center justify-between px-6 py-6 md:px-12 md:py-8">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col justify-center space-y-1.5 md:hidden p-1"
-            aria-label="Open menu"
-            onClick={() => setMobileMenuOpen(true)}
+            className="text-xl font-bold tracking-wider"
           >
-            <Menu className="h-6 w-6 text-foreground" />
-          </motion.button>
-        </div>
-      </header>
+            <Link href="/" className="flex items-center">{logoText}</Link>
+          </motion.div>
+
+          <div className="flex items-center gap-6">
+            {/* Desktop Nav */}
+            <div className="hidden items-center space-x-8 md:flex">
+              {navLinks.map((link) => (
+                <NavLink key={link.label} href={link.href}>
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+
+            {loginLink && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="hidden md:block"
+              >
+                <a
+                  href={loginLink}
+                  className="text-sm font-bold tracking-widest text-foreground transition-all hover:opacity-70 border-b-2 border-brand-accent pb-0.5"
+                >
+                  LOGIN
+                </a>
+              </motion.div>
+            )}
+
+            {/* Mobile Hamburger */}
+            <motion.button
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col justify-center space-y-1.5 md:hidden p-1"
+              aria-label="Open menu"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6 text-foreground" />
+            </motion.button>
+          </div>
+        </header>
+      )}
 
       {/* Mobile Nav Drawer */}
       <AnimatePresence>
@@ -227,7 +231,7 @@ export const MinimalistHero = ({
             transition={{ duration: 0.6, delay: 1 }}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center pointer-events-none z-0"
           >
-            <span className="text-3xl font-extrabold text-white/90 leading-none drop-shadow">
+            <span className="text-3xl font-extrabold text-[#3a2218] leading-none">
               {overlayText.part1}<br />{overlayText.part2}
             </span>
           </motion.div>
@@ -317,7 +321,21 @@ export const MinimalistHero = ({
           transition={{ duration: 0.6, delay: 1.2 }}
           className="z-20 flex items-center justify-center text-center md:justify-start"
         >
-          <h1 className="text-7xl font-extrabold text-white md:text-8xl lg:text-9xl leading-[0.9]" style={{ textShadow: '0 4px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)' }}>
+          <h1 
+            className="text-7xl font-extrabold text-[#3a2218] md:text-8xl lg:text-9xl leading-[0.9]"
+            style={{
+              textShadow: `
+                -3px -3px 0 #faf7f3,  
+                 3px -3px 0 #faf7f3,
+                -3px  3px 0 #faf7f3,
+                 3px  3px 0 #faf7f3,
+                -4px -4px 0 #faf7f3,
+                 4px -4px 0 #faf7f3,
+                -4px  4px 0 #faf7f3,
+                 4px  4px 0 #faf7f3
+              `
+            }}
+          >
             {overlayText.part1}
             <br />
             {overlayText.part2}

@@ -1,103 +1,46 @@
 import { NextResponse } from 'next/server';
-import Retell from 'retell-sdk';
-import { supabase } from '@/lib/supabase';
-
-const retell = new Retell({
-  apiKey: process.env.RETELL_API_KEY || '',
-});
+import { mockRetellCalls } from '../sync/route';
 
 /**
  * GET /api/retell/auto-sync
- *
- * Intended to be called by Vercel Cron every 2 hours.
- * Vercel Cron config is in vercel.json.
- *
- * It syncs all recent Retell AI calls into the Supabase `retell_ai_calls` table,
- * populating: call_received_at, preferred_date, preferred_time.
+ * 
+ * Vercel Cron mock handler (zero external database dependencies).
+ * Simulates a cron job syncing new calls.
  */
 export async function GET() {
   try {
-    const calls = await retell.call.list({ limit: 50 });
-
-    if (!calls || !Array.isArray(calls)) {
-      return NextResponse.json({ error: 'Failed to fetch calls from Retell' }, { status: 500 });
+    // Add a randomized mock call on auto-sync if we don't have too many, to show a live dashboard
+    if (mockRetellCalls.length < 5) {
+      const randomNames = ['Arjun Nair', 'Siddharth Sen', 'Kavitha Reddy', 'Aditi Rao'];
+      const randomProcedures = ['Chemical Peel', 'Acne Scar Laser', 'Hair Regrowth Therapy'];
+      const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
+      const randomProc = randomProcedures[Math.floor(Math.random() * randomProcedures.length)];
+      
+      const newMockId = `call-auto-${Math.random().toString(36).substr(2, 5)}`;
+      mockRetellCalls.push({
+        call_id: newMockId,
+        user_name: randomName,
+        phone_number: '+91 96000 11223',
+        call_received_at: new Date().toISOString(),
+        preferred_date: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+        preferred_time: '12:00 PM',
+        preferred_procedure: randomProc,
+        duration_ms: 78000,
+        status: 'completed',
+        transcript: `Patient requested appointment for ${randomProc}. Details scheduled successfully.`,
+        start_time: new Date().toISOString(),
+        action_status: 'Needs Action',
+      });
     }
-
-    const results = { added: 0, updated: 0, errors: 0 };
-
-    for (const call of calls) {
-      try {
-        const callAnalysis = (call as any).call_analysis;
-        const customVars = (callAnalysis as any)?.custom_analysis_data || {};
-
-        const userName = (customVars as any)?.user_name || 'Unknown';
-        const phoneNumber = (call as any).from_number || (call as any).to_number || 'Web Call';
-        const preferredProcedure = (customVars as any)?.preferred_procedure || 'N/A';
-
-        const startTimeStr = call.start_timestamp
-          ? new Date(call.start_timestamp).toISOString()
-          : new Date().toISOString();
-
-        // call_received_at = the actual timestamp the call came in
-        const callReceivedAt = startTimeStr;
-
-        // Split preferred_date and preferred_time from custom vars
-        const rawPreferredDate = (customVars as any)?.preferred_date || '';
-        const rawPreferredTime = (customVars as any)?.preferred_time || '';
-
-        // Fallback: if the old combined field was used, try to split it
-        const rawCombined = (customVars as any)?.preferred_date_time || '';
-        const preferredDate = rawPreferredDate || (rawCombined ? rawCombined.split('T')[0] : '');
-        const preferredTime = rawPreferredTime || (rawCombined ? rawCombined.split('T')[1]?.split('.')[0] || '' : '');
-
-        const durationMs = call.duration_ms || 0;
-        const status = call.call_status || 'unknown';
-        const transcript = call.transcript || '';
-
-        const { error } = await supabase
-          .from('retell_ai_calls')
-          .upsert(
-            {
-              call_id: call.call_id,
-              user_name: userName,
-              phone_number: phoneNumber,
-              call_received_at: callReceivedAt,
-              preferred_date: preferredDate,
-              preferred_time: preferredTime,
-              preferred_procedure: preferredProcedure,
-              duration_ms: durationMs,
-              status: status,
-              transcript: transcript,
-              start_time: startTimeStr,
-            },
-            { onConflict: 'call_id' }
-          );
-
-        if (error) {
-          console.error(`[auto-sync] Error upserting call ${call.call_id}:`, error);
-          results.errors++;
-        } else {
-          results.added++;
-        }
-      } catch (err) {
-        console.error(`[auto-sync] Processing error for call ${call.call_id}:`, err);
-        results.errors++;
-      }
-    }
-
-    console.log(`[auto-sync] Completed at ${new Date().toISOString()}:`, results);
 
     return NextResponse.json({
       success: true,
-      message: `Auto-sync complete. Processed ${calls.length} calls.`,
-      stats: results,
+      message: 'Auto-sync cron simulated successfully (In-Memory).',
       syncedAt: new Date().toISOString(),
+      stats: { added: 1, updated: 0, errors: 0 }
     });
   } catch (error: any) {
-    console.error('[auto-sync] Error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error during auto-sync', details: error.message },
-      { status: 500 }
-    );
+    console.error('Auto-sync cron simulation error:', error);
+    return NextResponse.json({ error: 'Internal server error during auto-sync' }, { status: 500 });
   }
 }

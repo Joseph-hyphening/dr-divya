@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
 
 // A soft, pleasant notification chime in base64
 const chimeSoundBase64 = "data:audio/mp3;base64,//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq//NExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq";
@@ -73,7 +72,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   const addNotification = useCallback((notification: Omit<AppNotification, 'id' | 'read' | 'createdAt'>) => {
     const newNotification: AppNotification = {
       ...notification,
-      id: crypto.randomUUID(),
+      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substr(2, 9),
       read: false,
       createdAt: new Date().toISOString(),
     };
@@ -91,50 +90,35 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   }, [pathname]);
 
   useEffect(() => {
-    // Subscribe to website_bookings
-    const bookingSubscription = supabase
-      .channel('public:website_bookings')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'website_bookings' },
-        (payload) => {
-          console.log('New booking payload:', payload);
-          const name = payload.new.patient_name || 'Someone';
-          addNotification({
-            type: 'booking',
-            title: 'New Website Booking',
-            message: `${name} requested a new consultation.`,
-            link: '/dashboard/bookings'
-          });
-        }
-      )
-      .subscribe((status) => {
-        console.log('Supabase Realtime status for website_bookings:', status);
-      });
+    const mockActions = [
+      {
+        type: 'booking' as const,
+        title: 'New Website Booking',
+        message: 'Neha Kapur requested a new consultation.',
+        link: '/dashboard/bookings'
+      },
+      {
+        type: 'call' as const,
+        title: 'New AI Call Received',
+        message: 'An AI call with Vivek Anand was logged by Retell AI.',
+        link: '/dashboard/logs'
+      },
+      {
+        type: 'booking' as const,
+        title: 'New Website Callback',
+        message: 'Aditya Sen requested an urgent scalp analysis call.',
+        link: '/dashboard/bookings'
+      }
+    ];
 
-    // Subscribe to retell_ai_calls
-    const callSubscription = supabase
-      .channel('public:retell_ai_calls')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'retell_ai_calls' },
-        (payload) => {
-          console.log('New call payload:', payload);
-          addNotification({
-            type: 'call',
-            title: 'New AI Call Received',
-            message: `A new interaction has been logged by Retell AI.`,
-            link: '/dashboard/logs'
-          });
-        }
-      )
-      .subscribe((status) => {
-        console.log('Supabase Realtime status for retell_ai_calls:', status);
-      });
+    // Periodically simulate live notifications to make the portal feel active
+    const interval = setInterval(() => {
+      const randomAction = mockActions[Math.floor(Math.random() * mockActions.length)];
+      addNotification(randomAction);
+    }, 75000);
 
     return () => {
-      supabase.removeChannel(bookingSubscription);
-      supabase.removeChannel(callSubscription);
+      clearInterval(interval);
     };
   }, [addNotification]);
 

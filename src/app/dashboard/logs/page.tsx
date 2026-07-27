@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
 import { useRole } from '@/lib/RoleContext';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 
@@ -82,52 +81,19 @@ const LogsPage = () => {
 
   const fetchLogs = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('retell_ai_calls')
-      .select('*')
-      .order('call_received_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching logs:', error);
-    } else if (data && data.length > 0) {
-      setLogs(data);
-    } else {
-      // Mock data for initial view if table is empty
-      const now = new Date();
-      setLogs([
-        {
-          id: '1',
-          call_id: 'call_mock_1',
-          user_name: 'John Doe',
-          phone_number: '+1234567890',
-          call_received_at: new Date(now.getTime() - 3600000).toISOString(),
-          preferred_date: '2026-03-25',
-          preferred_time: '10:30',
-          preferred_procedure: 'Consultation',
-          duration_ms: 125000,
-          status: 'completed',
-          start_time: new Date(now.getTime() - 3600000).toISOString(),
-          transcript: 'Agent: Hello, how can I help? User: I want to book a consultation.',
-          action_status: 'Scheduled'
-        },
-        {
-          id: '2',
-          call_id: 'call_mock_2',
-          user_name: 'Jane Smith',
-          phone_number: '+1987654321',
-          call_received_at: new Date(now.getTime() - 7200000).toISOString(),
-          preferred_date: '2026-03-26',
-          preferred_time: '14:00',
-          preferred_procedure: 'Cleaning',
-          duration_ms: 45000,
-          status: 'completed',
-          start_time: new Date(now.getTime() - 7200000).toISOString(),
-          transcript: "Agent: Hello? User: Hi, is this Dr. Divya's clinic?",
-          action_status: 'Pending'
-        }
-      ]);
+    try {
+      const res = await fetch('/api/retell/sync');
+      const result = await res.json();
+      if (result.success) {
+        setLogs(result.data || []);
+      } else {
+        console.error('Error fetching logs:', result.error);
+      }
+    } catch (err) {
+      console.error('Error fetching logs:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const [filters, setFilters] = useState<FilterState>({
@@ -161,22 +127,26 @@ const LogsPage = () => {
   const updateActionStatus = async (logId: string, newStatus: CallLog['action_status'], reason?: string) => {
     // 1. Optimistic UI update
     setLogs(prevLogs => prevLogs.map(log => 
-      log.id === logId ? { ...log, action_status: newStatus, cancellation_reason: newStatus === 'Cancelled' ? (reason || undefined) : undefined } : log
+      log.call_id === logId || log.id === logId ? { ...log, action_status: newStatus, cancellation_reason: newStatus === 'Cancelled' ? (reason || undefined) : undefined } : log
     ));
     
-    // 2. Persist to Supabase
+    // 2. Persist locally via API
     try {
-      const { error } = await supabase
-        .from('retell_ai_calls')
-        .update({ action_status: newStatus, cancellation_reason: newStatus === 'Cancelled' ? (reason || null) : null })
-        .eq('id', logId);
+      const logObj = logs.find(l => l.id === logId || l.call_id === logId);
+      const targetCallId = logObj ? logObj.call_id : logId;
 
-      if (error) {
-        console.error('Failed to update action_status in Supabase:', error);
-        alert('Failed to save status. Please try again.');
+      const res = await fetch('/api/retell/sync', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ call_id: targetCallId, action_status: newStatus })
+      });
+      const result = await res.json();
+      if (!result.success) {
+        console.error('Failed to update action status:', result.error);
+        alert('Failed to update status on server.');
       }
     } catch (err) {
-      console.error('Unexpected error saving to Supabase:', err);
+      console.error('API Error updating action status:', err);
     }
   };
 
@@ -329,9 +299,12 @@ const LogsPage = () => {
         </nav>
 
         <button 
-          onClick={async () => {
-            const { supabase } = await import('@/lib/supabase');
-            await supabase.auth.signOut();
+          onClick={() => {
+            // Mock sign out
+            document.cookie = 'mock-session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            localStorage.removeItem('mock-session-token');
+            localStorage.removeItem('admin-email');
+            window.location.href = '/login';
           }}
           className="w-full flex items-center space-x-4 text-xs font-bold tracking-[0.2em] text-[#1a1a1a]/40 hover:text-red-500 transition-colors"
         >

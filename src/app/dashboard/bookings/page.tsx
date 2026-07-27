@@ -24,7 +24,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
 import { useRole } from '@/lib/RoleContext';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 
@@ -98,18 +97,21 @@ const BookingsPage = () => {
 
   const fetchBookings = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('website_bookings')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching website bookings:', error);
+    try {
+      const res = await fetch('/api/bookings');
+      const result = await res.json();
+      if (result.success) {
+        setBookings(result.data || []);
+      } else {
+        console.error('Error fetching website bookings:', result.error);
+        setBookings([]);
+      }
+    } catch (err) {
+      console.error('Error fetching website bookings:', err);
       setBookings([]);
-    } else {
-      setBookings(data || []);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -223,9 +225,12 @@ const BookingsPage = () => {
         </nav>
 
         <button 
-          onClick={async () => {
-            const { supabase } = await import('@/lib/supabase');
-            await supabase.auth.signOut();
+          onClick={() => {
+            // Mock sign out
+            document.cookie = 'mock-session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            localStorage.removeItem('mock-session-token');
+            localStorage.removeItem('admin-email');
+            window.location.href = '/login';
           }}
           className="w-full flex items-center space-x-4 text-xs font-bold tracking-[0.2em] text-[#1a1a1a]/40 hover:text-red-500 transition-colors"
         >

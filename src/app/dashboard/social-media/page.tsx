@@ -452,9 +452,12 @@ const SocialMediaPage = () => {
         </nav>
 
         <button 
-          onClick={async () => {
-            const { supabase } = await import('@/lib/supabase');
-            await supabase.auth.signOut();
+          onClick={() => {
+            // Mock sign out
+            document.cookie = 'mock-session-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            localStorage.removeItem('mock-session-token');
+            localStorage.removeItem('admin-email');
+            window.location.href = '/login';
           }}
           className="w-full flex items-center space-x-4 text-xs font-bold tracking-[0.2em] text-[#1a1a1a]/40 hover:text-red-500 transition-colors"
         >

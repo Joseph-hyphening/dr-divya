@@ -5,8 +5,6 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-
 const LoginPage = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -22,15 +20,21 @@ const LoginPage = () => {
     setIsLoading(true);
     setError(null);
 
-    try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
-      if (signInError) throw signInError;
-      
-      router.push('/dashboard');
+    try {
+      // Allow signing in with the password 'admin123'
+      if (password === 'admin123') {
+        // Set mock session cookie
+        document.cookie = 'mock-session-token=dr-divya-authorized; path=/; max-age=86400';
+        localStorage.setItem('mock-session-token', 'dr-divya-authorized');
+        localStorage.setItem('admin-email', email);
+        
+        router.push('/dashboard');
+      } else {
+        throw new Error('Invalid credentials. Use password "admin123".');
+      }
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to sign in. Please check your credentials.');

@@ -14,31 +14,36 @@ import { ChatbotSection } from '@/components/sections/ChatbotSection';
 import { BlogPreview } from '@/components/sections/BlogPreview';
 import { FAQAccordion } from '@/components/sections/FAQAccordion';
 import { StickyMobileActions } from '@/components/ui/StickyMobileActions';
+import { Testimonials } from '@/components/sections/Testimonials';
+import { Header } from '@/components/layout/Header';
+import { LeadFormSection } from '@/components/sections/LeadFormSection';
 
 const MinimalistHeroDemo = () => {
   const navLinks = [
-    { label: 'HOME', href: '#' },
-    { label: 'ABOUT', href: '#about' },
-    { label: 'SERVICES', href: '#services' },
-    { label: 'TECHNOLOGY', href: '#technology' },
-    { label: 'CONTACT', href: '#contact' },
+    { label: 'HOME', href: '/' },
+    { label: 'ABOUT', href: '/dr-divya-sharma' },
+    { label: 'SERVICES', href: '/skin-concerns' },
+    { label: 'TECHNOLOGY', href: '/about-clinic' },
+    { label: 'CONTACT', href: '/contact-us' },
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: '#' },
-    { icon: Instagram, href: '#' },
-    { icon: Twitter, href: '#' },
-    { icon: Linkedin, href: '#' },
+    { icon: Facebook, href: 'https://facebook.com' },
+    { icon: Instagram, href: 'https://instagram.com' },
+    { icon: Twitter, href: 'https://twitter.com' },
+    { icon: Linkedin, href: 'https://linkedin.com' },
   ];
 
   return (
     <main className="min-h-screen flex flex-col relative bg-background">
+      <Header />
+
       <MinimalistHero
         logoText={<Image src="/logo.svg" alt="Dr. Divya's" width={140} height={32} className="h-8 w-auto object-contain" priority />}
         navLinks={navLinks}
-        loginLink="/login"
+        loginLink="/book-an-appointment"
         mainText="Dr. Divya Sharma, MBBS (Gold Medalist), MD (Skin). Bangalore's award-winning dermatologist with 12+ years of clinical excellence and US FDA approved technology."
-        readMoreLink="#about"
+        readMoreLink="/dr-divya-sharma"
         imageSrc="/dr-divya.png"
         imageAlt="Dr. Divya Sharma - Bangalore's Award-Winning Dermatologist"
         overlayText={{
@@ -47,6 +52,7 @@ const MinimalistHeroDemo = () => {
         }}
         socialLinks={socialLinks}
         locationText="Whitefield, Bangalore"
+        hideHeader={true}
       />
       
       <SocialProofBar />
@@ -63,11 +69,15 @@ const MinimalistHeroDemo = () => {
 
       <GallerySlider />
 
+      <Testimonials />
+
       <ChatbotSection />
 
       <BlogPreview />
 
       <FAQAccordion />
+
+      <LeadFormSection treatmentName="Dermatology Consultation" />
 
       <div id="contact">
         <FooterSection />

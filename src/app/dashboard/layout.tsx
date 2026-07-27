@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import { RoleContext } from '@/lib/RoleContext';
 import { NotificationProvider } from '@/lib/NotificationContext';
@@ -18,54 +17,23 @@ export default function DashboardLayout({
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    // Check local session cookie/localStorage
+    const hasSessionCookie = document.cookie.includes('mock-session-token=dr-divya-authorized');
+    const hasLocalStorageSession = typeof window !== 'undefined' && localStorage.getItem('mock-session-token') === 'dr-divya-authorized';
 
-    const handleSession = (session: any) => {
-      if (!session) {
-        router.replace('/login');
-        return;
-      }
-      const email = session.user.email;
-      setUserEmail(email);
-      
-      if (email === 'reception@hypheningmedia.com' && (pathname === '/dashboard' || pathname === '/dashboard/social-media')) {
-        router.replace('/dashboard/logs');
-      } else {
-        setIsLoading(false);
-      }
-    };
+    if (!hasSessionCookie && !hasLocalStorageSession) {
+      router.replace('/login');
+      return;
+    }
 
-    const checkAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) throw error;
+    const email = (typeof window !== 'undefined' && localStorage.getItem('admin-email')) || 'admin@drdivya.com';
+    setUserEmail(email);
 
-        if (mounted) {
-          handleSession(session);
-        }
-      } catch (err) {
-        console.error('Error checking auth session:', err);
-        if (mounted) {
-          router.replace('/login');
-        }
-      }
-    };
-
-    checkAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (mounted) {
-        handleSession(session);
-      }
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    if (email === 'reception@hypheningmedia.com' && (pathname === '/dashboard' || pathname === '/dashboard/social-media')) {
+      router.replace('/dashboard/logs');
+    } else {
+      setIsLoading(false);
+    }
   }, [router, pathname]);
 
   if (isLoading) {
