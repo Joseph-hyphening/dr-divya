@@ -163,7 +163,7 @@ export const EditorialHero: React.FC = () => {
     return () => cancelAnimationFrame(animationFrameId);
   }, [items]);
 
-  // Handle Drag / Scrub Interaction
+  // Handle Mouse Drag / Scrub Interaction
   const handleMouseDown = (e: React.MouseEvent) => {
     isDraggingRef.current = true;
     hasDraggedRef.current = false;
@@ -177,11 +177,38 @@ export const EditorialHero: React.FC = () => {
     if (Math.abs(deltaX) > 5) {
       hasDraggedRef.current = true;
     }
-    scrollOffsetRef.current = dragStartOffsetRef.current + deltaX;
+    scrollOffsetRef.current = dragStartOffsetRef.current - deltaX;
   };
 
   const handleMouseUp = () => {
     isDraggingRef.current = false;
+  };
+
+  // Handle Mobile Touch Interaction (Prevents getting stuck on hover)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 0) return;
+    isDraggingRef.current = true;
+    hasDraggedRef.current = false;
+    isHoveredRef.current = true;
+    dragStartXRef.current = e.touches[0].clientX;
+    dragStartOffsetRef.current = scrollOffsetRef.current;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingRef.current || e.touches.length === 0) return;
+    const deltaX = e.touches[0].clientX - dragStartXRef.current;
+    if (Math.abs(deltaX) > 4) {
+      hasDraggedRef.current = true;
+    }
+    scrollOffsetRef.current = dragStartOffsetRef.current - deltaX;
+  };
+
+  const handleTouchEnd = () => {
+    isDraggingRef.current = false;
+    // Automatically resume auto-scroll on mobile after brief pause
+    setTimeout(() => {
+      isHoveredRef.current = false;
+    }, 300);
   };
 
   const handleCardClick = (href: string) => {
@@ -191,7 +218,7 @@ export const EditorialHero: React.FC = () => {
   };
 
   return (
-    <section className="relative bg-[#FAF7F2] pt-10 sm:pt-14 pb-10 sm:pb-14 overflow-hidden border-b border-border/40">
+    <section suppressHydrationWarning className="relative bg-[#FAF7F2] pt-10 sm:pt-14 pb-10 sm:pb-14 overflow-hidden border-b border-border/40">
       
       {/* 1. ON TOP: Headline, Subtitle, CTA */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-5">
@@ -316,12 +343,16 @@ export const EditorialHero: React.FC = () => {
 
       {/* 3. THEN THE CAROUSEL (With True 3D Z-Axis Arc & Left-to-Right Scrolling) */}
       <div 
-        className="relative mt-8 sm:mt-10 w-full select-none cursor-grab active:cursor-grabbing"
+        className="relative mt-8 sm:mt-10 w-full select-none cursor-grab active:cursor-grabbing touch-pan-y"
         onMouseEnter={() => { isHoveredRef.current = true; }}
         onMouseLeave={() => { isHoveredRef.current = false; handleMouseUp(); }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         {/* Soft edge fade masks */}
         <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-28 bg-gradient-to-r from-[#FAF7F2] via-[#FAF7F2]/80 to-transparent z-30 pointer-events-none" />
