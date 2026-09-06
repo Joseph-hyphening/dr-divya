@@ -82,7 +82,7 @@ export const MinimalistHero = ({
   return (
     <div
       className={cn(
-        "relative flex min-h-screen w-full flex-col items-center overflow-hidden bg-background font-sans",
+        "relative flex min-h-[calc(100vh-5rem)] w-full flex-col items-center overflow-hidden bg-background font-sans",
         className,
       )}
     >
@@ -272,7 +272,7 @@ export const MinimalistHero = ({
       </div>
 
       {/* ── Desktop Layout ── */}
-      <div className="hidden md:grid relative w-full max-w-7xl flex-grow grid-cols-3 items-center px-12 pb-12">
+      <div className="hidden md:grid relative w-full max-w-7xl flex-grow grid-cols-3 items-center px-12 pb-8 -mt-10 lg:-mt-16">
         {/* Left Text Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

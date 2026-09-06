@@ -112,6 +112,7 @@ export const TreatmentHero: React.FC<TreatmentHeroProps> = ({
                   src={heroImage}
                   alt={`Dr. Divya Sharma - Specialist in ${treatmentName}`}
                   fill
+                  sizes="(max-width: 768px) 100vw, 448px"
                   className="object-cover object-top"
                   priority
                 />

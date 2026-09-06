@@ -40,7 +40,7 @@ function TimelineItem({
         </div>
         <motion.h3
           style={{ opacity }}
-          className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-foreground"
+          className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold font-inter tracking-tight text-foreground"
         >
           {item.title}
         </motion.h3>
@@ -49,7 +49,7 @@ function TimelineItem({
       <div className="relative pl-20 pr-4 md:pl-4 w-full">
         <motion.h3
           style={{ opacity }}
-          className="md:hidden block text-2xl mb-4 text-left font-bold text-foreground"
+          className="md:hidden block text-2xl mb-4 text-left font-bold font-inter tracking-tight text-foreground"
         >
           {item.title}
         </motion.h3>

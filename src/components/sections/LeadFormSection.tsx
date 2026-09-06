@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Calendar, User, Phone, Mail, FileText, CheckCircle2, Shield, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { saveLead } from '@/lib/cms-store';
 
 interface LeadFormSectionProps {
   treatmentName?: string;
@@ -25,11 +26,22 @@ export const LeadFormSection: React.FC<LeadFormSectionProps> = ({
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate booking submission
+    // Save to CMS leads store for doctor staff admin
+    saveLead({
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      preferredDate: formData.preferredDate,
+      treatmentName: treatmentName,
+      notes: formData.notes,
+      source: typeof window !== 'undefined' ? window.location.pathname : 'Landing Page'
+    });
+
+    // Simulate booking submission confirmation
     setTimeout(() => {
       setIsSubmitting(false);
       setSubmitted(true);
-    }, 600);
+    }, 400);
   };
 
   return (

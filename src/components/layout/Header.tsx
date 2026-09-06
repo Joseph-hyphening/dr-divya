@@ -207,7 +207,7 @@ export const Header = () => {
             </Button>
           </a>
           <Link href="/book-an-appointment">
-            <Button size="sm" className="rounded-full shadow-sm hover:shadow transition-all text-[11px] font-bold tracking-wider px-3.5 py-1.5 h-8">
+            <Button size="sm" className="rounded-full shadow-sm hover:shadow transition-all text-[11px] font-bold tracking-wider px-3.5 py-1.5 h-8 bg-brand-accent hover:bg-[#5E2F1E] text-white">
               <Calendar className="w-3.5 h-3.5 mr-1" /> BOOK APPOINTMENT
             </Button>
           </Link>
@@ -216,7 +216,7 @@ export const Header = () => {
         {/* Mobile Menu Toggle */}
         <div className="flex lg:hidden items-center space-x-2 flex-shrink-0">
           <Link href="/book-an-appointment" className="md:hidden">
-            <Button size="sm" className="rounded-full text-xs font-bold px-3 py-1 h-8">
+            <Button size="sm" className="rounded-full text-xs font-bold px-3 py-1 h-8 bg-brand-accent hover:bg-[#5E2F1E] text-white">
               Book
             </Button>
           </Link>

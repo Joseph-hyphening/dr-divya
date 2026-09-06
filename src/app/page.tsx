@@ -1,93 +1,70 @@
-'use client';
-
 import React from 'react';
-import { Facebook, Instagram, Twitter, Linkedin } from 'lucide-react';
-import { MinimalistHero } from '@/components/ui/minimalist-hero';
-import Image from 'next/image';
-import { AboutSection } from '@/components/sections/About';
-import { ServicesSection } from '@/components/sections/Services';
-import { FooterSection } from '@/components/sections/Footer';
-import { SocialProofBar } from '@/components/sections/SocialProofBar';
-import { GallerySlider } from '@/components/sections/GallerySlider';
-import { TechShowcase } from '@/components/sections/TechShowcase';
-import { ChatbotSection } from '@/components/sections/ChatbotSection';
-import { BlogPreview } from '@/components/sections/BlogPreview';
-import { FAQAccordion } from '@/components/sections/FAQAccordion';
-import { StickyMobileActions } from '@/components/ui/StickyMobileActions';
-import { Testimonials } from '@/components/sections/Testimonials';
+import dynamic from 'next/dynamic';
 import { Header } from '@/components/layout/Header';
-import { LeadFormSection } from '@/components/sections/LeadFormSection';
+import { EditorialHero } from '@/components/sections/EditorialHero';
+import { ProcessBento } from '@/components/sections/ProcessBento';
+import { SocialProofBar } from '@/components/sections/SocialProofBar';
+import { ServicesSection } from '@/components/sections/Services';
+import { AboutSection } from '@/components/sections/About';
 
-const MinimalistHeroDemo = () => {
-  const navLinks = [
-    { label: 'HOME', href: '/' },
-    { label: 'ABOUT', href: '/dr-divya-sharma' },
-    { label: 'SERVICES', href: '/skin-concerns' },
-    { label: 'TECHNOLOGY', href: '/about-clinic' },
-    { label: 'CONTACT', href: '/contact-us' },
-  ];
+// Below-the-fold code splitting for sub-2 second initial load
+const GallerySlider = dynamic(() => import('@/components/sections/GallerySlider').then((mod) => mod.GallerySlider));
+const Testimonials = dynamic(() => import('@/components/sections/Testimonials').then((mod) => mod.Testimonials));
+const BlogPreview = dynamic(() => import('@/components/sections/BlogPreview').then((mod) => mod.BlogPreview));
+const FAQAccordion = dynamic(() => import('@/components/sections/FAQAccordion').then((mod) => mod.FAQAccordion));
+const LeadFormSection = dynamic(() => import('@/components/sections/LeadFormSection').then((mod) => mod.LeadFormSection));
+const FooterSection = dynamic(() => import('@/components/sections/Footer').then((mod) => mod.FooterSection));
+const ChatbotSection = dynamic(() => import('@/components/sections/ChatbotSection').then((mod) => mod.ChatbotSection));
+const StickyMobileActions = dynamic(() => import('@/components/ui/StickyMobileActions').then((mod) => mod.StickyMobileActions));
 
-  const socialLinks = [
-    { icon: Facebook, href: 'https://facebook.com' },
-    { icon: Instagram, href: 'https://instagram.com' },
-    { icon: Twitter, href: 'https://twitter.com' },
-    { icon: Linkedin, href: 'https://linkedin.com' },
-  ];
-
+export default function HomePage() {
   return (
-    <main className="min-h-screen flex flex-col relative bg-background">
+    <main className="min-h-screen flex flex-col relative bg-[#FAF7F2] text-foreground font-sans selection:bg-brand-accent/20 selection:text-brand-accent">
+      {/* 1. Global Navigation Header (Immediate) */}
       <Header />
 
-      <MinimalistHero
-        logoText={<Image src="/logo.svg" alt="Dr. Divya's" width={140} height={32} className="h-8 w-auto object-contain" priority />}
-        navLinks={navLinks}
-        loginLink="/book-an-appointment"
-        mainText="Dr. Divya Sharma, MBBS (Gold Medalist), MD (Skin). Bangalore's award-winning dermatologist with 12+ years of clinical excellence and US FDA approved technology."
-        readMoreLink="/dr-divya-sharma"
-        imageSrc="/dr-divya.png"
-        imageAlt="Dr. Divya Sharma - Bangalore's Award-Winning Dermatologist"
-        overlayText={{
-          part1: 'truly',
-          part2: 'medical.',
-        }}
-        socialLinks={socialLinks}
-        locationText="Whitefield, Bangalore"
-        hideHeader={true}
-      />
-      
+      {/* 2. Editorial Hero Banner with 3D Curved Perspective Carousel (Immediate LCP) */}
+      <EditorialHero />
+
+      {/* 3. Verified Accreditations & Social Proof Bar */}
       <SocialProofBar />
 
-      <div id="about">
-        <AboutSection />
-      </div>
+      {/* 4. Editorial Process & Methodology Asymmetric Bento Grid */}
+      <ProcessBento />
 
+      {/* 5. Core Clinical Treatment Suites & Deep Topic Navigation */}
       <div id="services">
         <ServicesSection />
       </div>
 
-      <TechShowcase />
+      {/* 6. Medical Pedigree & Doctor's Journey */}
+      <div id="about">
+        <AboutSection />
+      </div>
 
+      {/* 7. Clinical Infrastructure & Clinic Tour (Dynamically chunked) */}
       <GallerySlider />
 
+      {/* 8. Verified Patient Testimonials & Results */}
       <Testimonials />
 
-      <ChatbotSection />
-
+      {/* 9. Dermatology Knowledge & Educational Blog */}
       <BlogPreview />
 
+      {/* 10. Patient Clarification FAQs */}
       <FAQAccordion />
 
-      <LeadFormSection treatmentName="Dermatology Consultation" />
+      {/* 11. VIP Lead Capture & Private Appointment Booking */}
+      <LeadFormSection treatmentName="Comprehensive Dermatology Consultation" />
 
+      {/* 12. Super-Footer Directory with Complete Internal Linking Matrix */}
       <div id="contact">
         <FooterSection />
       </div>
 
-      {/* Floating Elements */}
+      {/* 13. Floating Support & Mobile Actions (Non-blocking client-only) */}
       <ChatbotSection isFloating={true} />
       <StickyMobileActions />
     </main>
   );
-};
-
-export default MinimalistHeroDemo;
+}
