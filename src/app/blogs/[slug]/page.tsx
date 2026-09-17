@@ -24,13 +24,60 @@ import {
   Tag, 
   Award,
   Phone,
-  Layers
+  Layers,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+function SafeBlogHeaderImage({
+  src,
+  alt,
+}: {
+  src?: string;
+  alt: string;
+}) {
+  const fallback = '/service-clinical-derm.png';
+  const initial = (src && typeof src === 'string' && src.trim().length > 0) ? src.trim() : fallback;
+  const [imgSrc, setImgSrc] = useState(initial);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const valid = (src && typeof src === 'string' && src.trim().length > 0) ? src.trim() : fallback;
+    setImgSrc(valid);
+    setError(false);
+  }, [src]);
+
+  const activeSrc = error ? fallback : imgSrc;
+  const isExternal = activeSrc.startsWith('http://') || activeSrc.startsWith('https://') || activeSrc.startsWith('//');
+
+  if (isExternal) {
+    return (
+      <img
+        src={activeSrc}
+        alt={alt || 'Dr. Divya Sharma Dermatology'}
+        onError={() => setError(true)}
+        className="w-full h-full object-cover"
+        style={{ position: 'absolute', height: '100%', width: '100%', inset: 0 }}
+      />
+    );
+  }
+
+  return (
+    <Image
+      src={activeSrc}
+      alt={alt || 'Dr. Divya Sharma Dermatology'}
+      fill
+      priority
+      onError={() => setError(true)}
+      className="object-cover"
+    />
+  );
+}
+
 export default function BlogDetailPage() {
   const params = useParams();
-  const slug = params?.slug as string;
+  const rawSlug = params?.slug as string;
+  const slug = decodeURIComponent(rawSlug || '');
   const [blog, setBlog] = useState<BlogArticle | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,8 +87,9 @@ export default function BlogDetailPage() {
     if (found) {
       setBlog(found);
     } else {
-      // Fallback check in initialBlogs
-      const initial = initialBlogs.find((b) => b.slug === slug);
+      const initial = initialBlogs.find(
+        (b) => b.slug.toLowerCase() === slug.toLowerCase()
+      );
       setBlog(initial || null);
     }
     setLoading(false);
@@ -50,8 +98,9 @@ export default function BlogDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
-        <div className="text-sm font-semibold text-foreground/60 animate-pulse">
-          Loading Clinical Article...
+        <div className="text-sm font-semibold text-foreground/60 animate-pulse flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-brand-accent animate-spin" />
+          <span>Loading Clinical Article...</span>
         </div>
       </div>
     );
@@ -62,14 +111,16 @@ export default function BlogDetailPage() {
       <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center p-6 text-center space-y-4">
         <h1 className="text-2xl font-bold text-foreground">Article Not Found</h1>
         <p className="text-sm text-muted-foreground max-w-md">
-          The requested dermatology article could not be found or has been moved.
+          The requested dermatology article could not be found or has been relocated in our archive.
         </p>
-        <Link href="/blogs" className="px-5 py-2.5 rounded-full bg-brand-accent text-white text-xs font-bold uppercase tracking-wider">
-          Back to Blog Hub
+        <Link href="/blogs" className="px-5 py-2.5 rounded-full bg-brand-accent text-white text-xs font-bold uppercase tracking-wider shadow-xs">
+          Back to Blog Library
         </Link>
       </div>
     );
   }
+
+  const isHtml = /<[a-z][\s\S]*>/i.test(blog.content);
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] flex flex-col selection:bg-brand-accent/20">
@@ -82,7 +133,7 @@ export default function BlogDetailPage() {
           className="inline-flex items-center gap-2 text-xs font-semibold text-foreground/60 hover:text-brand-accent transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>All Dermatology Articles</span>
+          <span>All Dermatology Articles (330+)</span>
         </Link>
 
         {/* Article Header */}
@@ -111,14 +162,14 @@ export default function BlogDetailPage() {
             {blog.excerpt}
           </p>
 
-          {/* Author Badge */}
-          <div className="pt-2 flex items-center gap-3 border-t border-border/60">
-            <div className="relative w-11 h-11 rounded-full overflow-hidden border border-brand-accent/20 bg-brand-accent/10 shrink-0">
+          {/* Author Credentials Badge */}
+          <div className="pt-3 flex items-center gap-3.5 border-t border-border/60">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden border border-brand-accent/20 bg-brand-accent/10 shrink-0">
               <Image src="/dr-divya.png" alt="Dr. Divya Sharma" fill className="object-cover object-top" />
             </div>
             <div>
               <div className="text-xs font-bold text-foreground">{blog.author}</div>
-              <div className="text-[11px] text-muted-foreground">Gold Medalist Dermatologist • Medical Director</div>
+              <div className="text-[11px] text-muted-foreground">MBBS (Gold Medalist) • Doctor of Medicine (MD) in Dermatology</div>
             </div>
           </div>
         </header>
@@ -136,17 +187,14 @@ export default function BlogDetailPage() {
                 />
               </div>
               <p className="text-center text-xs text-muted-foreground italic">
-                *Clinical case photographic progression. Individual response may vary based on skin type and adherence.
+                *Clinical photographic progression. Individual response may vary based on skin phototype and compliance.
               </p>
             </div>
           ) : (
-            <div className="relative h-72 sm:h-96 w-full rounded-3xl overflow-hidden border border-border/80 shadow-md bg-muted">
-              <Image
+            <div className="relative h-72 sm:h-96 w-full rounded-3xl overflow-hidden border border-border/80 shadow-md bg-[#F2EDE4]">
+              <SafeBlogHeaderImage
                 src={blog.singleImage || '/service-clinical-derm.png'}
-                alt={blog.title}
-                fill
-                priority
-                className="object-cover"
+                alt={blog.title || 'Dermatology Article'}
               />
             </div>
           )}
@@ -179,27 +227,34 @@ export default function BlogDetailPage() {
 
         {/* ARTICLE BODY CONTENT */}
         <article className="prose prose-neutral max-w-none space-y-6 text-foreground/80 leading-relaxed text-sm sm:text-base font-normal">
-          {blog.content.split('\n\n').map((block, idx) => {
-            if (block.startsWith('### ')) {
+          {isHtml ? (
+            <div
+              className="space-y-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:font-serif [&>h2]:text-foreground [&>h2]:pt-4 [&>h3]:text-xl [&>h3]:font-bold [&>h3]:text-foreground [&>h3]:pt-3 [&>p]:leading-relaxed [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:space-y-1 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:space-y-1"
+              dangerouslySetInnerHTML={{ __html: blog.content }}
+            />
+          ) : (
+            blog.content.split('\n\n').map((block, idx) => {
+              if (block.startsWith('### ')) {
+                return (
+                  <h3 key={idx} className="text-xl sm:text-2xl font-bold font-serif italic text-foreground pt-4">
+                    {block.replace('### ', '')}
+                  </h3>
+                );
+              }
+              if (block.startsWith('## ')) {
+                return (
+                  <h2 key={idx} className="text-2xl sm:text-3xl font-bold font-serif italic text-foreground pt-6">
+                    {block.replace('## ', '')}
+                  </h2>
+                );
+              }
               return (
-                <h3 key={idx} className="text-xl sm:text-2xl font-bold font-serif italic text-foreground pt-4">
-                  {block.replace('### ', '')}
-                </h3>
+                <p key={idx} className="leading-relaxed">
+                  {block}
+                </p>
               );
-            }
-            if (block.startsWith('## ')) {
-              return (
-                <h2 key={idx} className="text-2xl sm:text-3xl font-bold font-serif italic text-foreground pt-6">
-                  {block.replace('## ', '')}
-                </h2>
-              );
-            }
-            return (
-              <p key={idx} className="leading-relaxed">
-                {block}
-              </p>
-            );
-          })}
+            })
+          )}
         </article>
 
         {/* Tags */}
@@ -224,7 +279,7 @@ export default function BlogDetailPage() {
               Have questions about your skin or hair condition?
             </h3>
             <p className="text-xs text-foreground/70 max-w-md">
-              Schedule a personalized diagnostic consultation with Dr. Divya Sharma at our Whitefield clinic.
+              Schedule a personalized diagnostic consultation with Dr. Divya Sharma at our Whitefield clinic or book an online video consultation.
             </p>
           </div>
 

@@ -163,7 +163,7 @@ export default function KeloidsPage() {
         }
       ]}
       relatedLinks={[
-        { title: "Acne Scar Removal", href: "/scar-removal", desc: "Fractional CO2 laser, subcision, and RF microneedling for deep facial and body acne scars" },
+        { title: "Acne Scar Removal", href: "/scar-removal", desc: "Subcision, chemical peels, and RF microneedling for deep facial and body acne scars" },
         { title: "Acne & Pimples Care", href: "/acne-pimples", desc: "Prevent post-acne inflammatory scarring with early clinical treatment and medical topicals" },
         { title: "Radiofrequency Skin Tags & Cysts", href: "/skin-tags", desc: "Radiofrequency snip removal for skin tags, moles, and benign raised dermal lesions" },
         { title: "Stretch Marks Collagen Remodeling", href: "/stretch-marks", desc: "Collagen remodeling and microneedling RF for deep skin striae and tissue tears" },

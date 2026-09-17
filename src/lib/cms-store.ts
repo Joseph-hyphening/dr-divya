@@ -17,7 +17,7 @@ export interface BlogArticle {
   beforeAfter?: {
     beforeImage: string; // WebP format
     afterImage: string;  // WebP format
-    label?: string;      // e.g. "8 Weeks Post CO2 Laser"
+    label?: string;      // e.g. "8 Weeks Post RF Microneedling"
   };
   internalLinks: { title: string; href: string }[];
   content: string;
@@ -57,7 +57,7 @@ export interface ConditionMediaItem {
 export interface ConditionData {
   id: string;
   slug: string;
-  category: 'skin' | 'hair' | 'pediatrics';
+  category: 'skin' | 'aesthetics' | 'hair' | 'pediatrics';
   title: string;
   subtitle: string;
   hookSubtitle: string;
@@ -74,14 +74,16 @@ export interface ConditionData {
   lastUpdated: string;
 }
 
-// Initial Seed Blogs
+import { replicatedBlogs } from './blogs-data';
+
+// Initial Seed Blogs + Full Replicated Blog Archive from drdivyasharma.com (338+ articles)
 export const initialBlogs: BlogArticle[] = [
   {
     id: 'blog-1',
-    title: 'Fractional CO2 Laser for Deep Acne Scars: Real Clinical Outcomes & Recovery',
-    slug: 'fractional-co2-laser-for-deep-acne-scars',
-    excerpt: 'A comprehensive medical breakdown of ablative fractional photothermolysis, epidermal remodeling times, and Indian skin safety protocols.',
-    category: 'Acne & Laser Science',
+    title: 'RF Microneedling & Subcision for Deep Acne Scars: Real Clinical Outcomes',
+    slug: 'rf-microneedling-and-subcision-for-deep-acne-scars',
+    excerpt: 'A comprehensive medical breakdown of fractional radiofrequency collagen stimulation, fibrous subcision, and safe Indian skin protocols.',
+    category: 'Acne & Scar Science',
     readTime: '6 min read',
     author: 'Dr. Divya Sharma, MBBS (Gold Medalist), MD',
     date: 'August 28, 2026',
@@ -89,11 +91,11 @@ export const initialBlogs: BlogArticle[] = [
     beforeAfter: {
       beforeImage: '/process/step-01-dermoscopy.jpg',
       afterImage: '/process/step-03-laser-suite.jpg',
-      label: '4 Sessions Fractional CO2 • 12 Weeks Follow-up'
+      label: '4 Sessions RF Microneedling • 12 Weeks Follow-up'
     },
     internalLinks: [
-      { title: 'Acne & Scar Revision Suite', href: '/acne-pimples' },
-      { title: 'Laser Skin Resurfacing', href: '/skin-resurfacing-and-rejuvenation' },
+      { title: 'Acne & Scar Revision Suite', href: '/scar-removal' },
+      { title: 'Skin Resurfacing & Texture', href: '/skin-resurfacing-texture' },
       { title: 'Chemical Peels Protocol', href: '/chemical-peels' }
     ],
     content: `Acne scars are permanent texture indentations resulting from dermal collagen matrix destruction during severe inflammatory acne flares.
@@ -101,12 +103,12 @@ export const initialBlogs: BlogArticle[] = [
 ### Why Over-the-Counter Creams Fail on True Scars
 Topical retinoids and vitamin C serums can improve superficial post-inflammatory erythema (red spots) and hyperpigmentation (brown spots). However, they cannot penetrate into the reticular dermis with sufficient energy to stimulate architectural collagen matrix remodeling.
 
-### The Fractional Photothermolysis Principle
-US-FDA approved fractional CO2 lasers emit micro-thermal zones (MTZs) at a 10,600nm wavelength. By vaporizing microscopic columns of scarred tissue while leaving surrounding healthy islands untouched, the skin rapidly epithelializes from the inside out.
+### The Fractional Radiofrequency & Subcision Principle
+Advanced radiofrequency microneedling bypasses the melanin-rich epidermis to deliver controlled thermal energy directly into the reticular dermis, stimulating neo-collagenesis without thermal damage to surface pigment. Combined with subcision to release tethered fibrous bands, indented scars smoothly elevate.
 
 ### Indian Skin Protocol & Zero Pigmentation Risk
-Treating Fitzpatrick skin types III through V requires meticulous parameter calibration: conservative pulse energy, fractionated density, and aggressive pre-procedure epidermal barrier priming with targeted ceramides to eliminate post-inflammatory hyperpigmentation (PIH).`,
-    tags: ['Acne Scars', 'CO2 Laser', 'Indian Skin Safety', 'Clinical Dermatology'],
+Treating Fitzpatrick skin types III through V requires avoiding aggressive ablative thermal damage. Radiofrequency energy offers a superior safety profile for Indian skin, eliminating the risk of post-inflammatory hyperpigmentation (PIH) while rebuilding genuine dermal volume.`,
+    tags: ['Acne Scars', 'RF Microneedling', 'Subcision', 'Clinical Dermatology'],
     published: true,
   },
   {
@@ -131,7 +133,8 @@ Treating Fitzpatrick skin types III through V requires meticulous parameter cali
 A healthy skin barrier relies on a strict equimolar ratio of Ceramides, Cholesterol, and Free Fatty Acids (3:1:1). At Dr. Divya Skin & Hair Solutions, our non-steroid protocols replace missing intracellular lipids and regulate epidermal pH without immunosuppressive atrophy.`,
     tags: ['Eczema', 'Zero-Steroid', 'Barrier Repair', 'TSW'],
     published: true,
-  }
+  },
+  ...replicatedBlogs
 ];
 
 // Initial Seed Conditions covering the landing page hero and core clinical clusters
@@ -167,7 +170,7 @@ export const initialConditions: ConditionData[] = [
       },
       {
         id: 'ba-acne-2',
-        title: 'Fractional CO2 Deep Scar Remodeling • 4 Sessions',
+        title: 'RF Microneedling Deep Scar Remodeling • 4 Sessions',
         beforeImage: '/process/step-01-dermoscopy.jpg',
         afterImage: '/process/step-03-laser-suite.jpg',
         patientAge: '28 Years Old',
@@ -338,7 +341,7 @@ export const initialConditions: ConditionData[] = [
     category: 'skin',
     title: 'Stretch Marks',
     subtitle: 'Collagen Remodeling',
-    hookSubtitle: 'Fractional Micro-Needling RF and CO2 Laser Blending',
+    hookSubtitle: 'Fractional Micro-Needling RF and Subcision Blending',
     description: 'Stimulating fresh elastin and neo-collagenesis to fade red striae rubrae and smooth silvery striae albae.',
     keyBenefits: ['Significant Depth Reduction', 'Texture Tightening', 'Post-Pregnancy Safe', 'Gradual Natural Blending'],
     heroImage: '/laser-treatment.png',
@@ -545,15 +548,26 @@ export function getBlogs(): BlogArticle[] {
       localStorage.setItem(BLOGS_STORAGE_KEY, JSON.stringify(initialBlogs));
       return initialBlogs;
     }
-    return JSON.parse(data);
+    const stored = JSON.parse(data) as BlogArticle[];
+    if (stored.length < initialBlogs.length) {
+      const storedSlugs = new Set(stored.map((b) => b.slug.toLowerCase()));
+      const missing = initialBlogs.filter((b) => !storedSlugs.has(b.slug.toLowerCase()));
+      const merged = [...stored, ...missing];
+      localStorage.setItem(BLOGS_STORAGE_KEY, JSON.stringify(merged));
+      return merged;
+    }
+    return stored;
   } catch {
     return initialBlogs;
   }
 }
 
 export function getBlogBySlug(slug: string): BlogArticle | undefined {
+  const normalized = slug?.toLowerCase();
   const blogs = getBlogs();
-  return blogs.find((b) => b.slug === slug);
+  const found = blogs.find((b) => b.slug.toLowerCase() === normalized);
+  if (found) return found;
+  return initialBlogs.find((b) => b.slug.toLowerCase() === normalized);
 }
 
 export function saveBlog(blog: BlogArticle): void {
@@ -617,7 +631,7 @@ export function saveCondition(condition: ConditionData): void {
   window.dispatchEvent(new Event('dr_divya_cms_update'));
 }
 
-export function getHeroCarouselItems(category: 'skin' | 'hair' | 'pediatrics') {
+export function getHeroCarouselItems(category: 'skin' | 'aesthetics' | 'hair' | 'pediatrics') {
   const conditions = getConditions().filter((c) => c.category === category);
   return conditions.map((c) => ({
     id: c.id,
@@ -654,7 +668,7 @@ export const initialLeads: PatientLead[] = [
     email: 'pooja.h@gmail.com',
     preferredDate: '2026-09-08',
     treatmentName: 'Acne & Scars Treatment',
-    notes: 'Struggling with recurrent cystic breakouts on cheeks and chin. Interested in Fractional CO2 laser.',
+    notes: 'Struggling with recurrent cystic breakouts on cheeks and chin. Interested in RF microneedling.',
     submittedAt: '2026-09-06T10:15:00.000Z',
     status: 'new',
     source: '/acne-pimples'

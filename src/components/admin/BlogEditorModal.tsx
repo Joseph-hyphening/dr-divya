@@ -337,7 +337,7 @@ export const BlogEditorModal: React.FC<BlogEditorModalProps> = ({
                     type="text"
                     value={beforeAfterLabel}
                     onChange={(e) => setBeforeAfterLabel(e.target.value)}
-                    placeholder="e.g. 4 Sessions Fractional CO2 • 12 Weeks Follow-up"
+                    placeholder="e.g. 4 Sessions RF Microneedling • 12 Weeks Follow-up"
                     className="w-full p-2.5 rounded-xl border border-border bg-white text-xs text-foreground focus:outline-none"
                   />
                 </div>

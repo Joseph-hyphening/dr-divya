@@ -75,8 +75,8 @@ export const FooterSection = () => {
           </div>
         </div>
 
-        {/* High-Impact SEO Internal Linking Matrix (Hubs & Deep Clusters) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-10 pt-2 text-xs">
+        {/* High-Impact SEO Internal Linking Matrix (5 Independent Dedicated Hubs) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6 pt-2 text-xs">
           
           {/* Column 1: Medical Dermatology */}
           <div className="space-y-3">
@@ -104,7 +104,7 @@ export const FooterSection = () => {
               </li>
               <li>
                 <Link href="/dark-circles" className="hover:text-background transition-colors hover:underline">
-                  Dark Circles & Under-Eye Rejuvenation
+                  Dark Circles & Under-Eye Refresh
                 </Link>
               </li>
               <li>
@@ -129,12 +129,12 @@ export const FooterSection = () => {
               </li>
               <li>
                 <Link href="/skin-tags" className="hover:text-background transition-colors hover:underline">
-                  Radiofrequency Skin Tag & Cyst Removal
+                  RF Skin Tag & Cyst Removal
                 </Link>
               </li>
               <li>
                 <Link href="/topical-steroids" className="hover:text-background transition-colors hover:underline">
-                  Topical Steroid Withdrawal (TSW) Care
+                  Steroid Withdrawal (TSW) Rehab
                 </Link>
               </li>
             </ul>
@@ -150,75 +150,115 @@ export const FooterSection = () => {
             </Link>
             <ul className="space-y-2 pt-1 text-background/70">
               <li>
-                <Link href="/hollywood-peel" className="hover:text-background transition-colors hover:underline">
-                  Hollywood Carbon Laser Peel
+                <Link href="/unwanted-hair" className="hover:text-background font-semibold text-brand-accent transition-colors hover:underline">
+                  Laser Hair Reduction (US-FDA)
                 </Link>
               </li>
               <li>
-                <Link href="/chemical-peels" className="hover:text-background transition-colors hover:underline">
-                  Medical Chemical Peels
+                <Link href="/bridal-dermatology" className="hover:text-background transition-colors hover:underline">
+                  Bridal Dermatology Packages
+                </Link>
+              </li>
+              <li>
+                <Link href="/hollywood-peel" className="hover:text-background transition-colors hover:underline">
+                  Hollywood Peel
+                </Link>
+              </li>
+              <li>
+                <Link href="/carbon-peel" className="hover:text-background transition-colors hover:underline">
+                  Carbon Peel
                 </Link>
               </li>
               <li>
                 <Link href="/laser-toning" className="hover:text-background transition-colors hover:underline">
-                  Q-Switched Laser Toning
+                  Q Switched Laser Skin Rejuvenation
+                </Link>
+              </li>
+              <li>
+                <Link href="/dark-spot-and-pigment-reduction" className="hover:text-background transition-colors hover:underline">
+                  Q Switched Laser Pigmentation Removal
                 </Link>
               </li>
               <li>
                 <Link href="/scar-removal" className="hover:text-background transition-colors hover:underline">
-                  Acne Scar Removal (Fractional CO2)
+                  Micro Needling & Radio Frequency (MNRF)
                 </Link>
               </li>
               <li>
                 <Link href="/skin-resurfacing-texture" className="hover:text-background transition-colors hover:underline">
-                  Skin Resurfacing & Pore Tightening
+                  Fractional Resurfacing (FSR)
                 </Link>
               </li>
               <li>
-                <Link href="/unwanted-hair" className="hover:text-background transition-colors hover:underline">
-                  Painless Laser Hair Removal
+                <Link href="/body-contouring" className="hover:text-background transition-colors hover:underline">
+                  Pro Shaper for Arms Contouring
                 </Link>
               </li>
               <li>
-                <Link href="/unwanted-male-body-hair" className="hover:text-background transition-colors hover:underline">
-                  Male Laser Beard Shaping & Grooming
+                <Link href="/body-contouring" className="hover:text-background transition-colors hover:underline">
+                  Pro Shaper for Jawline Contouring
                 </Link>
               </li>
               <li>
-                <Link href="/tattoo-removal" className="hover:text-background transition-colors hover:underline">
-                  Q-Switched Laser Tattoo Removal
+                <Link href="/dark-circles" className="hover:text-background transition-colors hover:underline">
+                  iFine for Under Eye Rejuvenation
                 </Link>
               </li>
               <li>
-                <Link href="/fairness-facial-glow" className="hover:text-background transition-colors hover:underline">
-                  Antioxidant Glow Medi-Facials
+                <Link href="/oxyjet-medifacial" className="hover:text-background transition-colors hover:underline">
+                  OxyJet MediFacial
                 </Link>
               </li>
               <li>
-                <Link href="/stretch-marks" className="hover:text-background transition-colors hover:underline">
-                  Stretch Marks RF Collagen Remodeling
+                <Link href="/hydra-medifacial" className="hover:text-background transition-colors hover:underline">
+                  Hydra MediFacial
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Hair, Scalp & Pediatric Dermatology */}
+          {/* Column 3: Hair Growth & Trichology (Strictly Separate from Pediatric) */}
           <div className="space-y-3">
             <Link 
               href="/hair-scalp-problems"
               className="font-bold text-sm text-background hover:text-brand-accent transition-colors uppercase tracking-wider block border-b border-background/20 pb-1"
             >
-              Hair & Pediatric Care →
+              Hair & Trichology →
             </Link>
             <ul className="space-y-2 pt-1 text-background/70">
               <li>
                 <Link href="/hair-loss" className="hover:text-background transition-colors hover:underline">
-                  Hair Loss & GFC Regrowth Therapy
+                  PRP for Hair Growth
+                </Link>
+              </li>
+              <li>
+                <Link href="/hair-loss" className="hover:text-background transition-colors hover:underline">
+                  GFC for Hair Growth
+                </Link>
+              </li>
+              <li>
+                <Link href="/hair-loss" className="hover:text-background transition-colors hover:underline">
+                  PRF for Hair Growth
+                </Link>
+              </li>
+              <li>
+                <Link href="/hair-loss" className="hover:text-background transition-colors hover:underline">
+                  Mesotherapy for Hair Growth
+                </Link>
+              </li>
+              <li>
+                <Link href="/hair-loss" className="hover:text-background transition-colors hover:underline">
+                  Low Level Laser Therapy (LLLT)
+                </Link>
+              </li>
+              <li>
+                <Link href="/hair-loss" className="hover:text-background transition-colors hover:underline">
+                  Medical Grade LED for Hair Growth
                 </Link>
               </li>
               <li>
                 <Link href="/hair-loss-in-men" className="hover:text-background transition-colors hover:underline">
-                  Male Pattern Hair Loss & Thinning
+                  Male Pattern Hair Loss
                 </Link>
               </li>
               <li>
@@ -228,22 +268,24 @@ export const FooterSection = () => {
               </li>
               <li>
                 <Link href="/dandruff" className="hover:text-background transition-colors hover:underline">
-                  Chronic Scalp Dandruff & Flaking Relief
+                  Chronic Scalp Dandruff Relief
                 </Link>
               </li>
-              <li>
-                <Link href="/newborn-pediatric-dermatology" className="hover:text-background font-semibold transition-colors hover:underline">
-                  Pediatric Dermatology Hub
-                </Link>
-              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Pediatric Dermatology (Strictly Separate from Hair) */}
+          <div className="space-y-3">
+            <Link 
+              href="/newborn-pediatric-dermatology"
+              className="font-bold text-sm text-background hover:text-brand-accent transition-colors uppercase tracking-wider block border-b border-background/20 pb-1"
+            >
+              Pediatric Dermatology →
+            </Link>
+            <ul className="space-y-2 pt-1 text-background/70">
               <li>
                 <Link href="/baby-skin-care" className="hover:text-background transition-colors hover:underline">
-                  Newborn & Infant Skin Care Protocols
-                </Link>
-              </li>
-              <li>
-                <Link href="/common-skin-rashes-in-babies" className="hover:text-background transition-colors hover:underline">
-                  Common Baby Skin Rashes & Heat Bumps
+                  Newborn & Infant Skin Care
                 </Link>
               </li>
               <li>
@@ -253,12 +295,17 @@ export const FooterSection = () => {
               </li>
               <li>
                 <Link href="/diaper-rash" className="hover:text-background transition-colors hover:underline">
-                  Diaper Rash & Barrier Cream Care
+                  Diaper Rash & Barrier Healing
+                </Link>
+              </li>
+              <li>
+                <Link href="/common-skin-rashes-in-babies" className="hover:text-background transition-colors hover:underline">
+                  Common Baby Rashes & Heat Bumps
                 </Link>
               </li>
               <li>
                 <Link href="/food-allergy" className="hover:text-background transition-colors hover:underline">
-                  Pediatric & Adult Food Allergy Rashes
+                  Baby Food Allergies & Atopic Skin
                 </Link>
               </li>
             </ul>

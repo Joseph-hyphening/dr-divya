@@ -51,11 +51,11 @@ export const LuxuryHero: React.FC = () => {
             >
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-normal tracking-tight text-foreground leading-[1.14]">
                 <span className="font-inter font-normal text-foreground/95">
-                  Where Clinical Mastery <br className="hidden sm:block" />
+                  Where Clinical Excellence <br className="hidden sm:block" />
                   Meets{' '}
                 </span>
                 <span className="font-serif bg-gradient-to-r from-brand-accent via-[#9e5539] to-brand-accent bg-clip-text text-transparent italic font-normal">
-                  Aesthetic Artistry
+                  World-Class Aesthetics
                 </span>
                 .
               </h1>
@@ -239,7 +239,7 @@ export const LuxuryHero: React.FC = () => {
           <div className="space-y-1">
             <div className="text-2xl sm:text-3xl lg:text-4xl font-serif font-extrabold text-brand-accent tracking-tight">100%</div>
             <div className="text-xs sm:text-sm font-semibold text-foreground">US-FDA Approved</div>
-            <div className="text-[11px] text-muted-foreground">Alma, Q-Switched & Fractional CO2</div>
+            <div className="text-[11px] text-muted-foreground">Alma, Q-Switched & RF Microneedling</div>
           </div>
           <div className="space-y-1">
             <div className="text-2xl sm:text-3xl lg:text-4xl font-serif font-extrabold text-brand-accent tracking-tight">Gold Medal</div>

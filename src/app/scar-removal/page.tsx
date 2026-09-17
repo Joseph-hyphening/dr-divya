@@ -4,7 +4,7 @@ import { TreatmentPageTemplate } from '@/components/templates/TreatmentPageTempl
 
 export const metadata: Metadata = {
   title: 'Acne Scar Removal Bangalore | Dr. Divya Sharma Skin Clinic',
-  description: 'Fractional CO2 Laser & RF Microneedling scar removal in Whitefield Bangalore. Reduce ice-pick, boxcar, and surgical scars safely.',
+  description: 'Advanced RF Microneedling & Subcision scar removal in Whitefield Bangalore. Reduce ice-pick, boxcar, and surgical scars safely.',
 };
 
 export default function ScarRemovalPage() {
@@ -13,8 +13,8 @@ export default function ScarRemovalPage() {
       hero={{
         badge: 'Advanced Collagen Remodeling',
         title: 'Acne Scar & Surgical Scar Reduction',
-        hookSubtitle: 'Smooth Pitted Scars & Restore Even Skin Texture with Fractional CO2 & RF Microneedling',
-        description: 'Rebuild collagen beneath depressed scars. Dr. Divya Sharma utilizes combination therapies—Fractional CO2 laser, Subcision, and Microneedling RF—for maximum scar depth reduction.',
+        hookSubtitle: 'Smooth Pitted Scars & Restore Even Skin Texture with RF Microneedling & Subcision',
+        description: 'Rebuild collagen beneath depressed scars. Dr. Divya Sharma utilizes combination therapies—EndyMed 3DEEP RF Microneedling, Subcision, and Medical Chemical Peels—for maximum scar depth reduction.',
         treatmentName: 'Scar Removal Consultation',
         keyBenefits: [
           'Effective on Ice-Pick, Boxcar & Rolling Scars',
@@ -27,7 +27,7 @@ export default function ScarRemovalPage() {
         title: 'Multi-Dimensional Scar Treatment Science',
         paragraphs: [
           'Scars form when deep inflammation destroys collagen fibers and anchors skin downward. Surface topicals alone cannot reach deep scar tissue.',
-          'Dr. Divya Sharma uses subcision to release fibrous bands underneath the scar, followed by Fractional laser resurfacing to trigger fresh collagen synthesis and smooth out depressions.'
+          'Dr. Divya Sharma uses subcision to release fibrous bands underneath the scar, followed by radiofrequency microneedling to trigger fresh collagen synthesis and smooth out depressions.'
         ],
         causesOrSymptomsTitle: 'Types of Scars We Treat',
         causesOrSymptoms: [
@@ -48,8 +48,8 @@ export default function ScarRemovalPage() {
           },
           {
             stepNumber: '02',
-            title: 'Subcision & Laser Pass',
-            description: 'Releasing tethered bands and creating micro-thermal collagen zones.'
+            title: 'Subcision & RF Microneedling',
+            description: 'Releasing tethered bands and delivering controlled radiofrequency energy to remodel the dermal matrix.'
           },
           {
             stepNumber: '03',

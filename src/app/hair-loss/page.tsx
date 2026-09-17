@@ -30,14 +30,16 @@ export default function HairLossPage() {
           'When hair loss occurs, this delicate cycle is disrupted. In Androgenetic Alopecia (pattern baldness), dihydrotestosterone (DHT) binds to androgen receptors on scalp hair follicles, shortening the anagen phase and triggering progressive follicle miniaturization—causing thick terminal hair to shrink into fine, wispy vellus hair. In Telogen Effluvium, acute stress, fever, nutritional deficiencies, or hormonal shifts trigger premature mass shifting of hair follicles from growth into shed mode.',
           'At Dr. Divya Sharma clinic in Whitefield, Bangalore, we perform non-invasive digital trichoscopy to quantify hair density, follicle diameter, and scalp vascularity. We utilize next-generation autologous Growth Factor Concentrate (GFC) therapy—harvesting highly concentrated activated growth factors (PDGF, VEGF, EGF, IGF-1) from your blood plasma—to reactivate dormant miniaturized follicles and stimulate robust hair regrowth.'
         ],
-        causesOrSymptomsTitle: 'Common Hair Loss Indications & Causes',
+        causesOrSymptomsTitle: 'Specialized Hair Growth Procedures & Indications',
         causesOrSymptoms: [
-          'Widening hair parting & visible scalp exposure along the crown',
-          'Excessive daily hair shedding (>100 strands/day) during washing or brushing',
-          'Receding bitemporal hairline & thinning temple hair (Pattern Alopecia)',
-          'Post-pregnancy, post-fever, or stress-induced acute Telogen Effluvium',
-          'Nutritional deficiencies (Low Ferritin, Vitamin D, Zinc, B12) & thyroid disorders',
-          'Scalp inflammation, excess sebum accumulation & severe dandruff flakes'
+          'PRP-Platelet Rich Plasma for Hair Growth (Autologous concentrated platelet release)',
+          'GFC- Growth Factor Concentrate for Hair Growth (Pure acellular growth factor regeneration)',
+          'PRF- Platelet Rich Fibrin for Hair Growth (Fibrin matrix for extended follicular bio-stimulation)',
+          'Mesotherapy for Hair Growth (Micro-infusion of hair vitamins, peptides & amino acids)',
+          'Low Level Laser Therapy (LLLT) for Hair Growth (650nm photobiomodulation cold laser)',
+          'Medical grade LED for Hair Growth (Anti-inflammatory, cellular ATP stimulation)',
+          'Androgenetic Alopecia (Male & female pattern thinning and crown hair loss)',
+          'Telogen Effluvium (Acute stress, hormonal shift, or postpartum hair shedding)'
         ]
       }}
       approach={{

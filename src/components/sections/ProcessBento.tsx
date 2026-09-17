@@ -36,7 +36,7 @@ const processSteps = [
     title: 'US-FDA Cleared Suite Precision',
     image: '/process/step-03-laser-suite.jpg',
     tag: 'Advanced Laser Technology',
-    description: 'Calibrated specifically for Indian skin types using fractional CO2 scar remodeling, Q-Switched Nd:YAG pigment clearance, and triple-chilling in-motion laser hair reduction.',
+    description: 'Calibrated specifically for Indian skin types using RF microneedling scar revision, Q-Switched Nd:YAG pigment clearance, and triple-chilling in-motion laser hair reduction.',
     highlight: 'Maximum efficacy, minimal downtime'
   },
   {

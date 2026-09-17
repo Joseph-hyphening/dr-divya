@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   reactCompiler: true,
   compress: true,
   poweredByHeader: false,
@@ -38,6 +42,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'placehold.co',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.drdivyasharma.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'drdivyasharma.com',
+      },
     ],
   },
   async headers() {
@@ -61,6 +73,18 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      fallback: [
+        {
+          source: '/:slug',
+          destination: '/blogs/:slug',
+        },
+      ],
+    };
   },
 };
 

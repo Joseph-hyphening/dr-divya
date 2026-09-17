@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Sparkles, Stethoscope, Scissors, Baby, Zap, CheckCircle2, SplitSquareVertical } from 'lucide-react';
+import { ArrowRight, Sparkles, Stethoscope, Scissors, Baby, SplitSquareVertical } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getConditions, ConditionData } from '@/lib/cms-store';
 import { BeforeAfterSlider } from '@/components/ui/BeforeAfterSlider';
@@ -26,60 +26,56 @@ const clinicalSuites = [
       { name: "Psoriasis & Scalp Plaques", href: "/psoriasis" },
       { name: "Eczema & Barrier Repair", href: "/eczema" },
       { name: "Skin Allergies & Hives", href: "/skin-allergies" },
+      { name: "Keratosis Pilaris Care", href: "/keratosis-pilaris" },
+      { name: "Viral Warts & RF Snipping", href: "/warts-or-verrucae" },
     ]
   },
   {
     id: "aesthetic-med",
     conditionSlug: "melasma",
-    title: "Aesthetics & Laser Dermatology",
-    subtitle: "US-FDA approved rejuvenation & scar correction",
-    badge: "Gold-Standard Lasers",
+    title: "Aesthetics & Laser Procedures",
+    subtitle: "US-FDA approved rejuvenation & precision body shaping",
+    badge: "Gold-Standard Lasers & RF",
     icon: Sparkles,
     image: "/service-aesthetic-med.png",
     href: "/aesthetics-skin-care",
-    description: "Precision medical aesthetics combining Q-Switched lasers, fractional CO2 scar remodeling, and medical chemical peels.",
+    description: "Artistry meets medical laser physics: US-FDA approved multi-wavelength laser hair reduction, Hollywood peels, EndyMed MNRF, and non-invasive contouring.",
     treatments: [
-      { name: "Hollywood Carbon Laser Peel", href: "/hollywood-peel" },
-      { name: "Acne Scar Removal (CO2)", href: "/scar-removal" },
-      { name: "Q-Switched Laser Toning", href: "/laser-toning" },
-      { name: "Medical Chemical Peels", href: "/chemical-peels" },
-      { name: "Skin Resurfacing & Texture", href: "/skin-resurfacing-texture" },
-      { name: "Tattoo Removal", href: "/tattoo-removal" },
+      { name: "Laser Hair Reduction (US-FDA)", href: "/unwanted-hair" },
+      { name: "Bridal Dermatology Packages", href: "/bridal-dermatology" },
+      { name: "Hollywood Peel", href: "/hollywood-peel" },
+      { name: "Carbon Peel", href: "/carbon-peel" },
+      { name: "Q Switched Laser Skin Rejuvenation", href: "/laser-toning" },
+      { name: "Q Switched Laser Pigmentation Removal", href: "/dark-spot-and-pigment-reduction" },
+      { name: "Micro Needling and Radio Frequency (MNRF)", href: "/scar-removal" },
+      { name: "Fractional Resurfacing (FSR)", href: "/skin-resurfacing-texture" },
+      { name: "Pro Shaper for Arms Contouring", href: "/body-contouring" },
+      { name: "Pro Shaper for Jawline Contouring", href: "/body-contouring" },
+      { name: "iFine for Under Eye Rejuvenation", href: "/dark-circles" },
+      { name: "OxyJet MediFacial", href: "/oxyjet-medifacial" },
+      { name: "Hydra MediFacial", href: "/hydra-medifacial" },
     ]
   },
   {
     id: "hair-solutions",
     conditionSlug: "hair-loss",
-    title: "Trichology & Hair Restoration",
-    subtitle: "Biological hair follicle regrowth therapies",
-    badge: "Regenerative Medicine",
+    title: "Trichology & Hair Growth",
+    subtitle: "Advanced regenerative & photobiomodulation therapies",
+    badge: "Follicular Regrowth Science",
     icon: Scissors,
     image: "/service-hair-restoration.png",
     href: "/hair-scalp-problems",
-    description: "Autologous Growth Factor Concentrate (GFC) therapy and polarized video-dermoscopy to reverse thinning and eliminate scalp dermatitis.",
+    description: "Dedicated clinical hair restoration utilizing autologous growth factors, polarized dermoscopy, and low-level laser therapy to revive miniaturized follicles.",
     treatments: [
-      { name: "Hair Loss & GFC Therapy", href: "/hair-loss" },
-      { name: "Male Pattern Baldness", href: "/hair-loss-in-men" },
-      { name: "Female Hair Fall & PCOS", href: "/hair-fall-in-female" },
-      { name: "Chronic Dandruff Relief", href: "/dandruff" },
-      { name: "Hair & Scalp Health Hub", href: "/hair-scalp-problems" },
-    ]
-  },
-  {
-    id: "laser-tech",
-    conditionSlug: "tattoo-removal",
-    title: "Painless Laser Hair & Ink Removal",
-    subtitle: "Triple-wavelength diode & Nd:YAG precision",
-    badge: "Pain-Free In-Motion Tech",
-    icon: Zap,
-    image: "/service-laser-tech.png",
-    href: "/unwanted-hair",
-    description: "Permanent reduction of unwanted facial and body hair utilizing US-FDA approved multi-wavelength chilling lasers engineered for Indian skin.",
-    treatments: [
-      { name: "Full Body Laser Hair Reduction", href: "/unwanted-hair" },
-      { name: "Male Beard Shaping & Chest", href: "/unwanted-male-body-hair" },
-      { name: "Facial Hair Reduction", href: "/unwanted-hair-removal" },
-      { name: "Laser Hair Removal FAQs", href: "/faq/laser-hair-removal" },
+      { name: "PRP - Platelet Rich Plasma for Hair Growth", href: "/hair-loss" },
+      { name: "GFC - Growth Factor Concentrate for Hair Growth", href: "/hair-loss" },
+      { name: "PRF - Platelet Rich Fibrin for Hair Growth", href: "/hair-loss" },
+      { name: "Mesotherapy for Hair Growth", href: "/hair-loss" },
+      { name: "Low Level Laser Therapy (LLLT) for Hair Growth", href: "/hair-loss" },
+      { name: "Medical Grade LED for Hair Growth", href: "/hair-loss" },
+      { name: "Male Pattern Baldness Protocols", href: "/hair-loss-in-men" },
+      { name: "Female Hair Fall & PCOS Shedding", href: "/hair-fall-in-female" },
+      { name: "Chronic Dandruff & Scalp Health", href: "/dandruff" },
     ]
   },
   {

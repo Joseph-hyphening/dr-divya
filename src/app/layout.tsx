@@ -226,7 +226,7 @@ export default function RootLayout({
             "@type": "HowToStep",
             "position": 3,
             "name": "US-FDA Cleared Suite Precision",
-            "text": "Fractional CO2 scar remodeling, Q-Switched Nd:YAG pigment clearance, and triple-chilling in-motion laser hair reduction calibrated for Indian skin."
+            "text": "RF Microneedling scar revision, Q-Switched Nd:YAG pigment clearance, and triple-chilling in-motion laser hair reduction calibrated for Indian skin."
           },
           {
             "@type": "HowToStep",

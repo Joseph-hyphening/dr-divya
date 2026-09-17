@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { replicatedBlogs } from '@/lib/blogs-data';
 
 const BASE_URL = 'https://www.drdivyasharma.com';
 
@@ -107,16 +108,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // 3. Laser & Aesthetic Procedures (Priority 0.85)
   const aestheticPages = [
+    'unwanted-hair',
+    'bridal-dermatology',
     'hollywood-peel',
-    'chemical-peels',
+    'carbon-peel',
     'laser-toning',
     'skin-laser-toning',
     'scar-removal',
     'skin-resurfacing-texture',
     'skin-resurfacing-and-rejuvenation',
-    'unwanted-hair',
+    'body-contouring',
+    'oxyjet-medifacial',
+    'hydra-medifacial',
     'unwanted-hair-removal',
     'unwanted-male-body-hair',
+    'chemical-peels',
     'tattoo-removal',
     'fairness-facial-glow',
     'stretch-marks',
@@ -187,6 +193,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  // 7. Full Archive of 338+ Dr. Divya Clinical Blog Articles (Priority 0.75)
+  const blogEntries: MetadataRoute.Sitemap = replicatedBlogs.map((blog) => ({
+    url: `${BASE_URL}/blogs/${blog.slug}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly' as const,
+    priority: 0.75,
+  }));
+
   return [
     ...corePages,
     ...medicalPages,
@@ -194,5 +208,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...hairPages,
     ...pediatricPages,
     ...contentPages,
+    ...blogEntries,
   ];
 }

@@ -27,7 +27,7 @@ export default function AboutClinicPage() {
         title: 'Excellence in Medical & Aesthetic Dermatology',
         paragraphs: [
           'Founded with a commitment to gold-standard dermatological care, Dr. Divya Sharma’s clinic bridges the gap between medical skin health and aesthetic enhancement.',
-          'We feature world-leading technologies including Q-Switched Nd:YAG lasers, Fractional CO2 resurfacing, LED phototherapy, and RF microneedling to deliver safe, effective results.',
+          'We feature world-leading technologies including Q-Switched Nd:YAG lasers, EndyMed 3DEEP RF microneedling, LED phototherapy, and subcision protocols to deliver safe, effective results.',
           'Every procedure is performed or strictly supervised by Dr. Divya Sharma to ensure zero compromise on safety, comfort, and efficacy.'
         ],
         causesOrSymptomsTitle: 'Why Patients Choose Our Clinic',

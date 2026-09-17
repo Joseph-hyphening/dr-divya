@@ -7,8 +7,64 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Tag, Sparkles, Clock, Calendar } from 'lucide-react';
 import { getBlogs, BlogArticle, initialBlogs } from '@/lib/cms-store';
 
+const SafeImage = ({
+  src,
+  alt,
+  fill,
+  className,
+}: {
+  src?: string;
+  alt: string;
+  fill?: boolean;
+  className?: string;
+}) => {
+  const fallback = '/service-clinical-derm.png';
+  const initialSrc = (src && typeof src === 'string' && src.trim().length > 0) ? src.trim() : fallback;
+  const [imgSrc, setImgSrc] = useState<string>(initialSrc);
+  const [hasError, setHasError] = useState<boolean>(false);
+
+  useEffect(() => {
+    const valid = (src && typeof src === 'string' && src.trim().length > 0) ? src.trim() : fallback;
+    setImgSrc(valid);
+    setHasError(false);
+  }, [src]);
+
+  const activeSrc = hasError ? fallback : imgSrc;
+  const isExternal = activeSrc.startsWith('http://') || activeSrc.startsWith('https://') || activeSrc.startsWith('//');
+
+  // If it is external, render standard img with object-cover to avoid Next.js domain/host restrictions
+  if (isExternal) {
+    return (
+      <img
+        src={activeSrc}
+        alt={alt || 'Dr. Divya Sharma Dermatology'}
+        onError={() => {
+          setHasError(true);
+          setImgSrc(fallback);
+        }}
+        className={className || 'w-full h-full object-cover'}
+        loading="lazy"
+        style={fill ? { position: 'absolute', height: '100%', width: '100%', inset: 0 } : undefined}
+      />
+    );
+  }
+
+  return (
+    <Image
+      src={activeSrc}
+      alt={alt || 'Dr. Divya Sharma Dermatology'}
+      fill={fill}
+      onError={() => {
+        setHasError(true);
+        setImgSrc(fallback);
+      }}
+      className={className}
+    />
+  );
+};
+
 export const BlogPreview = () => {
-  const [blogs, setBlogs] = useState<BlogArticle[]>(initialBlogs);
+  const [blogs, setBlogs] = useState<BlogArticle[]>(() => initialBlogs.slice(0, 3));
 
   const loadBlogs = () => {
     const list = getBlogs();
@@ -66,9 +122,9 @@ export const BlogPreview = () => {
                   {article.imageMode === 'before_after' && article.beforeAfter ? (
                     <div className="grid grid-cols-2 h-full w-full">
                       <div className="relative h-full">
-                        <Image 
+                        <SafeImage 
                           src={article.beforeAfter.beforeImage} 
-                          alt={`${article.title} Before`} 
+                          alt={`${article.title || 'Clinical Case'} Before`} 
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-700" 
                         />
@@ -77,9 +133,9 @@ export const BlogPreview = () => {
                         </span>
                       </div>
                       <div className="relative h-full border-l border-white">
-                        <Image 
+                        <SafeImage 
                           src={article.beforeAfter.afterImage} 
-                          alt={`${article.title} After`} 
+                          alt={`${article.title || 'Clinical Case'} After`} 
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-700" 
                         />
@@ -89,15 +145,15 @@ export const BlogPreview = () => {
                       </div>
                     </div>
                   ) : (
-                    <Image 
+                    <SafeImage 
                       src={article.singleImage || '/service-clinical-derm.png'} 
-                      alt={article.title} 
+                      alt={article.title || 'Clinical Insight'} 
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-700" 
                     />
                   )}
 
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
                     <span className="px-3 py-1 bg-white/95 backdrop-blur-md rounded-full text-brand-accent text-[10px] font-extrabold uppercase tracking-wider shadow-xs flex items-center gap-1">
                       <Tag className="h-2.5 w-2.5" />
                       {article.category}
@@ -125,7 +181,7 @@ export const BlogPreview = () => {
 
                   <h3 className="text-xl font-bold leading-snug group-hover:text-brand-accent transition-colors">
                     <Link href={`/blogs/${article.slug}`}>
-                      {article.title}
+                      {article.title || 'Clinical Case'}
                     </Link>
                   </h3>
 
@@ -137,14 +193,15 @@ export const BlogPreview = () => {
 
               <div className="px-5 pb-5 pt-3 border-t border-border/40 flex items-center justify-between">
                 <span className="text-[11px] text-foreground/60 font-semibold truncate max-w-[170px]">
-                  Dr. Divya Sharma
+                  {article.author}
                 </span>
+
                 <Link
                   href={`/blogs/${article.slug}`}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-brand-accent hover:underline"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-accent group-hover:translate-x-1 transition-transform"
                 >
-                  <span>Read Case</span>
-                  <ArrowRight className="w-3 h-3" />
+                  <span>Read Article</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             </motion.article>

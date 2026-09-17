@@ -56,10 +56,10 @@ export const AboutSection = () => {
         <div className="space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
             <Award className="w-4 h-4 text-primary" />
-            <span>Master of Medicine (MD) in Dermatology</span>
+            <span>Doctor of Medicine (MD) in Dermatology</span>
           </div>
           <p className="text-foreground/80 text-sm md:text-base font-normal leading-relaxed">
-            Completed <strong>Master of Medicine (MD) in Dermatology</strong> at the prestigious <strong>Indira Gandhi Government Medical College</strong>. Developed deep expertise in diagnosing and treating complex skin conditions, autoimmune dermatoses, clinical trichology, and dermatopathology.
+            Completed <strong>Doctor of Medicine (MD) in Dermatology</strong> at the prestigious <strong>Indira Gandhi Government Medical College</strong>. Developed deep expertise in diagnosing and treating complex skin conditions, autoimmune dermatoses, clinical trichology, and dermatopathology.
           </p>
           <div className="relative h-56 sm:h-64 w-full rounded-2xl overflow-hidden shadow-md border border-border/80 group">
             <Image
@@ -126,7 +126,7 @@ export const AboutSection = () => {
             <span>Advanced Energy Devices & Laser Mastery</span>
           </div>
           <p className="text-foreground/80 text-sm md:text-base font-normal leading-relaxed">
-            <strong>Mastered the latest technologies in Lasers</strong> to provide high-end, transformative aesthetic results. Specialized in US-FDA approved multi-wavelength laser physics, fractional CO2 scar remodeling, Q-Switched Nd:YAG pigment toning, and non-ablative rejuvenation calibrated specifically for Indian skin phototypes.
+            <strong>Mastered the latest technologies in Lasers</strong> to provide high-end, transformative aesthetic results. Specialized in US-FDA approved multi-wavelength laser physics, radiofrequency microneedling scar revision, Q-Switched Nd:YAG pigment toning, and non-ablative rejuvenation calibrated specifically for Indian skin phototypes.
           </p>
           <div className="relative h-56 sm:h-64 w-full rounded-2xl overflow-hidden shadow-md border border-border/80 group">
             <Image
@@ -138,7 +138,7 @@ export const AboutSection = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-blue-300">Aesthetic Precision</span>
               <p className="text-white text-sm font-semibold">
-                US-FDA Approved Laser Systems: Fractional CO2, Q-Switched & Diode Technologies
+                US-FDA Approved Laser Systems: Q-Switched Nd:YAG, Diode & RF Microneedling Technologies
               </p>
             </div>
           </div>
